@@ -1,8 +1,10 @@
 package com.example.medidordecibelesapp
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
@@ -10,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
 
@@ -43,6 +46,10 @@ class MainActivity : AppCompatActivity() {
                 sharedPreferences.edit().putBoolean(themeKey, newTheme).apply()
                 applyTheme(changeThemeButton, newTheme)
             }
+
+            val reportNoiseButton: ImageButton = findViewById(R.id.reportNoiseButton)
+            reportNoiseButton.setOnClickListener { openDecibelMeasurement(it) }
+
             Log.d(TAG, "onCreate: MainActivity setup complete")
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing MainActivity", e)
@@ -58,5 +65,11 @@ class MainActivity : AppCompatActivity() {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
         delegate.applyDayNight()
+    }
+    
+    fun openDecibelMeasurement(view: View) {
+        Log.d(TAG, "Opening DecibelMeasurementActivity")
+        val intent = Intent(this, DecibelMeasurementActivity::class.java)
+        startActivity(intent)
     }
 }

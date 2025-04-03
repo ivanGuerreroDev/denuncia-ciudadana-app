@@ -43,6 +43,32 @@
             android:textStyle="bold"
             android:textColor="?android:attr/textColor"
             tools:ignore="HarcodedText" />
+            
+        <LinearLayout
+            android:id="@+id/reportNoiseContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/reportNoiseButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Denunciar ruido"
+                android:src="@drawable/ic_ear" />
+                
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Denunciar Ruido"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:textColor="?android:attr/textColor" />
+        </LinearLayout>
 
     </LinearLayout>
 
