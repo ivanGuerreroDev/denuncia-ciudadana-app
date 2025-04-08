@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Medidor Decibeles App</string>
     <string name="back_button_description">Volver</string>
+    <string name="denuncia_delito">Denuncia Delito</string>
+    <string name="denunciar_ruido">Denunciar Ruido</string>
+    <string name="boton_denuncia_delitos">Botton Denuncia Delitos</string>
+    <string name="cambiar_tema">Cambiar Tema</string>
+    <string name="boton_denuncia_ruido">Botton Denuncia Ruido</string>
 </resources>
