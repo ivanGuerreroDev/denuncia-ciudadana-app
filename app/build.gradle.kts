@@ -26,6 +26,7 @@ android {
         manifestPlaceholders["MAPS_API_KEY"] = apiKey
     }
 
+
     buildTypes {
         release {
             isMinifyEnabled = false
