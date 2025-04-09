@@ -37,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Denuncia Ciudadana Panamá"
+            android:text="@string/denuncia_ciudadana_panam"
             android:textAlignment="center"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -59,11 +59,48 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
+
+                android:contentDescription="@string/denunciar_ruido"
+                android:src="@drawable/ic_ear" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/denunciar_ruido"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp"
+                android:textColor="?android:attr/textColor" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/reportDamageContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/reportDamageButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/denunciar_da_o"
+                android:src="@drawable/ic_damage" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/denunciar_da_o"
+                android:textSize="16sp"
+
                 android:contentDescription="@string/boton_denuncia_ruido"
                 android:src="@drawable/ic_ear" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+
                 android:layout_marginTop="8dp"
                 android:text="@string/denunciar_ruido"
                 android:textColor="?android:attr/textColor"

@@ -3,7 +3,17 @@
     <string name="back_button_description">Volver</string>
     <string name="denuncia_delito">Reportar Delito</string>
     <string name="denunciar_ruido">Reportar Ruido</string>
+
+    <string name="denunciar_da_o">Denunciar Daño</string>
+    <string name="denunciar_ruido">Denunciar Ruido</string>
+    <string name="denuncia_ciudadana_panam">Denuncia Ciudadana Panamá</string>
+    <string name="cambiar_tema">Cambiar Tema</string>
+    <string name="capturar_foto">Capturar Foto</string>
+    <string name="descripci_n_del_da_o">Descripción del daño</string>
+    <string name="enviar_alerta">Enviar Alerta</string>
+
     <string name="boton_denuncia_delitos">Botton Denuncia Delitos</string>
     <string name="cambiar_tema">Cambiar Tema</string>
     <string name="boton_denuncia_ruido">Botton Denuncia Ruido</string>
+
 </resources>
