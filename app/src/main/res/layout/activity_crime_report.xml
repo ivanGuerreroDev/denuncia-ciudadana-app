@@ -45,7 +45,7 @@
         </LinearLayout>
 
         <EditText
-            android:id="@+id/completeName"
+            android:id="@+id/fullName"
             android:layout_width="match_parent"
             android:layout_height="85dp"
             android:hint="Nombre Completo"
@@ -67,7 +67,7 @@
         <EditText
             android:id="@+id/eventsDescription"
             android:layout_width="match_parent"
-            android:layout_height="362dp"
+            android:layout_height="213dp"
             android:gravity="start"
             android:hint="Descripción del los hechos"
             android:importantForAutofill="no"
@@ -75,13 +75,23 @@
             android:textColorHint="#757575"
             tools:ignore="HardcodedText" />
 
+        <TextView
+            android:id="@+id/attachFileTextView"
+            android:layout_width="match_parent"
+            android:layout_height="147dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="Ningún archivo seleccionado"
+            android:textSize="14sp"
+            tools:ignore="HardcodedText,RtlHardcoded" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingTop="15dp">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/sentCrimeReportButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -90,7 +100,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="Enviar"
-                tools:ignore="ButtonStyle,HardcodedText,VisualLintButtonSize" />
+                tools:ignore="ButtonStyle,HardcodedText" />
 
             <Button
                 android:id="@+id/attachEvidenceButton"
@@ -101,7 +111,7 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="Adjuntar Evidencia"
-                tools:ignore="ButtonStyle,HardcodedText,TextSizeCheck,VisualLintButtonSize" />
+                tools:ignore="ButtonStyle,HardcodedText" />
 
         </LinearLayout>
 
