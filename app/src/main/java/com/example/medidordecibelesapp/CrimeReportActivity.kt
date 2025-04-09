@@ -9,6 +9,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -23,6 +24,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -35,13 +38,16 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import android.widget.LinearLayout
 
 class CrimeReportActivity : AppCompatActivity() {
 
     private lateinit var backButton: ImageButton
     private lateinit var sentCrimeReportButton: Button
     private lateinit var attachEvidenceButton: MaterialButton
-    private lateinit var attachFileTextView: TextView
+    private lateinit var noFilesTextView: TextView
+    private lateinit var attachedFilesRecyclerView: RecyclerView
+    private lateinit var filesAdapter: AttachedFilesAdapter
     private var attachFileUris: List<Uri> = emptyList()
     private lateinit var fullName: EditText
     private lateinit var identification: EditText
@@ -71,7 +77,7 @@ class CrimeReportActivity : AppCompatActivity() {
 
         initializeViews()
         setupClickListeners()
-
+        setupRecyclerView()
     }
 
     private fun initializeViews() {
@@ -84,12 +90,11 @@ class CrimeReportActivity : AppCompatActivity() {
         eventDescription = findViewById(R.id.eventsDescription)
         sentCrimeReportButton = findViewById(R.id.sentCrimeReportButton)
         attachEvidenceButton = findViewById(R.id.attachEvidenceButton)
-        attachFileTextView = findViewById(R.id.attachFileTextView)
-
+        noFilesTextView = findViewById(R.id.noFilesTextView)
+        attachedFilesRecyclerView = findViewById(R.id.attachedFilesRecyclerView)
     }
 
     private fun setupClickListeners() {
-
         backButton.setOnClickListener {
             Log.d("CrimeReportActivity", "Botón de regreso presionado")
             finish()
@@ -105,7 +110,34 @@ class CrimeReportActivity : AppCompatActivity() {
         locationField.setOnClickListener {
             showLocationMapModal()
         }
-
+    }
+    
+    private fun setupRecyclerView() {
+        filesAdapter = AttachedFilesAdapter(this) { position, uri ->
+            // Manejar eliminación de archivos
+            filesAdapter.removeFile(position)
+            
+            // Actualizar la lista principal de archivos
+            attachFileUris = filesAdapter.getFiles()
+            
+            // Mostrar u ocultar vistas según si hay archivos
+            updateFilesVisibility()
+        }
+        
+        attachedFilesRecyclerView.apply {
+            layoutManager = LinearLayoutManager(this@CrimeReportActivity)
+            adapter = filesAdapter
+        }
+    }
+    
+    private fun updateFilesVisibility() {
+        if (filesAdapter.getFiles().isEmpty()) {
+            noFilesTextView.visibility = View.VISIBLE
+            attachedFilesRecyclerView.visibility = View.GONE
+        } else {
+            noFilesTextView.visibility = View.GONE
+            attachedFilesRecyclerView.visibility = View.VISIBLE
+        }
     }
 
     private fun sentData() {
@@ -177,7 +209,6 @@ class CrimeReportActivity : AppCompatActivity() {
             when (requestCode) {
                 FILE_REQUEST_CODE -> {
                     val uris = mutableListOf<Uri>()
-                    val fileNames = mutableListOf<String>()
 
                     data?.let {
                         if (it.clipData != null) {
@@ -185,26 +216,23 @@ class CrimeReportActivity : AppCompatActivity() {
                             for (i in 0 until count) {
                                 val fileUri = it.clipData!!.getItemAt(i).uri
                                 uris.add(fileUri)
-                                fileNames.add(getFileName(fileUri))
                             }
                         } else if (it.data != null) {
                             val uri = it.data!!
                             uris.add(uri)
-                            fileNames.add(getFileName(uri))
                         }
                     }
 
                     if (uris.isNotEmpty()) {
-                        // Añadir los nuevos archivos a la lista existente
-                        val updatedUris = (attachFileUris + uris).distinct()
-                        attachFileUris = updatedUris
+                        // Añadir los archivos al adaptador
+                        filesAdapter.addFiles(uris)
                         
-                        // Obtener los nombres de todos los archivos seleccionados
-                        val allFileNames = updatedUris.map { getFileName(it) }
-                        val namesText = allFileNames.joinToString(separator = "\n")
+                        // Actualizar la lista principal de URIs
+                        attachFileUris = filesAdapter.getFiles()
                         
-                        attachFileTextView.text = "Archivos seleccionados:\n$namesText"
-                        Log.d("FileSelection", "URIs seleccionadas: $updatedUris")
+                        // Actualizar visibilidad de las vistas
+                        updateFilesVisibility()
+                        
                         Toast.makeText(this, "Archivo(s) añadido(s)", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -213,18 +241,15 @@ class CrimeReportActivity : AppCompatActivity() {
                     data?.getStringExtra("captured_media_uri")?.let { uriString ->
                         val mediaUri = Uri.parse(uriString)
                         
-                        // Añadir el nuevo archivo a la lista existente
-                        val updatedUris = (attachFileUris + mediaUri).distinct()
-                        attachFileUris = updatedUris
+                        // Añadir el archivo capturado al adaptador
+                        filesAdapter.addFiles(listOf(mediaUri))
                         
-                        // Obtener los nombres de todos los archivos seleccionados
-                        val allFileNames = updatedUris.map { getFileName(it) }
-                        val namesText = allFileNames.joinToString(separator = "\n")
+                        // Actualizar la lista principal de URIs
+                        attachFileUris = filesAdapter.getFiles()
                         
-                        // Actualizar el texto mostrado con todos los archivos
-                        attachFileTextView.text = "Archivos seleccionados:\n$namesText"
+                        // Actualizar visibilidad de las vistas
+                        updateFilesVisibility()
                         
-                        Log.d("CameraCapture", "Media capturada: $mediaUri")
                         Toast.makeText(this, "Archivo añadido", Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -299,83 +324,91 @@ class CrimeReportActivity : AppCompatActivity() {
     
     private fun showLocationMapModal() {
         try {
-            // Crear el diálogo con el layout del mapa
-            val dialogView = LayoutInflater.from(this).inflate(R.layout.modal_location_map, null)
-            
-            // Crear el diálogo con la vista inflada
-            locationDialog = AlertDialog.Builder(this)
-                .setView(dialogView)
-                .setCancelable(false)
-                .create()
-            
-            // Configurar los botones antes de mostrar el diálogo
-            dialogView.findViewById<Button>(R.id.btnCancelLocation)?.setOnClickListener {
-                locationDialog.dismiss()
+            // En lugar de usar AlertDialog, crearemos un FragmentDialog personalizado
+            val dialog = MapDialogFragment()
+            dialog.setLocationSelectedListener { location ->
+                // Cuando se selecciona una ubicación, actualizar el campo
+                selectedLocation = location
+                locationField.setText("Lat: ${location.latitude}, Lng: ${location.longitude}")
             }
-            
-            dialogView.findViewById<Button>(R.id.btnConfirmLocation)?.setOnClickListener {
-                // Guardar la ubicación seleccionada
-                selectedLocation?.let {
-                    locationField.setText("Lat: ${it.latitude}, Lng: ${it.longitude}")
-                }
-                locationDialog.dismiss()
-            }
-            
-            // Mostrar el diálogo
-            locationDialog.show()
-            
-            // Inicializar el mapa después de que el diálogo se muestre
-            val mapFragment = SupportMapFragment()
-            supportFragmentManager.beginTransaction()
-                .add(mapFragment, "mapFragment")
-                .commitNow() // Usar commitNow para asegurar que se complete inmediatamente
-            
-            // Reemplazar el contenedor del mapa con el fragmento
-            val mapContainer = dialogView.findViewById<FrameLayout>(R.id.mapLocation)
-            if (mapContainer != null) {
-                // Usar el childFragmentManager del fragmento para manejar el mapa
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.mapLocation, mapFragment)
-                    .commitNow() // Usar commitNow para asegurar que se complete inmediatamente
-                
-                mapFragment.getMapAsync(object : OnMapReadyCallback {
-                    override fun onMapReady(googleMap: GoogleMap) {
-                        // Configurar el mapa
-                        if (ActivityCompat.checkSelfPermission(this@CrimeReportActivity, 
-                                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                            googleMap.isMyLocationEnabled = true
-                        }
-                        
-                        // Si ya hay una ubicación seleccionada, mostrarla en el mapa
-                        selectedLocation?.let {
-                            googleMap.addMarker(MarkerOptions().position(it))
-                            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(it, 15f))
-                        }
-                        
-                        // Permitir seleccionar una ubicación en el mapa
-                        googleMap.setOnMapClickListener { latLng ->
-                            // Limpiar marcadores anteriores
-                            googleMap.clear()
-                            // Añadir un nuevo marcador
-                            googleMap.addMarker(MarkerOptions().position(latLng))
-                            // Guardar la ubicación seleccionada
-                            selectedLocation = latLng
-                        }
-                    }
-                })
-            } else {
-                Log.e("CrimeReportActivity", "No se encontró el contenedor del mapa")
-                Toast.makeText(this@CrimeReportActivity, "Error al cargar el mapa", Toast.LENGTH_SHORT).show()
-                locationDialog.dismiss()
-            }
+            dialog.show(supportFragmentManager, "map_dialog")
         } catch (e: Exception) {
             Log.e("CrimeReportActivity", "Error al inicializar el mapa: ${e.message}")
-            Toast.makeText(this@CrimeReportActivity, "Error al cargar el mapa", Toast.LENGTH_SHORT).show()
-            if (::locationDialog.isInitialized) {
-                locationDialog.dismiss()
-            }
+            Toast.makeText(this@CrimeReportActivity, "Error al cargar el mapa: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
+    // Clase interna que maneja el diálogo del mapa como un FragmentDialog
+    class MapDialogFragment : androidx.fragment.app.DialogFragment(), OnMapReadyCallback {
+        private var googleMap: GoogleMap? = null
+        private var selectedLocation: LatLng? = null
+        private var locationSelectedListener: ((LatLng) -> Unit)? = null
+        
+        fun setLocationSelectedListener(listener: (LatLng) -> Unit) {
+            locationSelectedListener = listener
+        }
+        
+        override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            return inflater.inflate(R.layout.modal_location_map, container, false)
+        }
+        
+        override fun onStart() {
+            super.onStart()
+            // Establecer tamaño del diálogo (casi pantalla completa)
+            dialog?.window?.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+        
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            
+            // Configurar botones
+            view.findViewById<Button>(R.id.btnCancelLocation).setOnClickListener {
+                dismiss()
+            }
+            
+            view.findViewById<Button>(R.id.btnConfirmLocation).setOnClickListener {
+                selectedLocation?.let { location ->
+                    locationSelectedListener?.invoke(location)
+                }
+                dismiss()
+            }
+            
+            // Inicializar el mapa
+            val mapFragment = childFragmentManager.findFragmentById(R.id.mapLocation) as SupportMapFragment
+            mapFragment.getMapAsync(this)
+        }
+        
+        override fun onMapReady(map: GoogleMap) {
+            googleMap = map
+            
+            // Configurar el mapa
+            context?.let { ctx ->
+                if (ActivityCompat.checkSelfPermission(
+                        ctx,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    googleMap?.isMyLocationEnabled = true
+                }
+            }
+            
+            // Permitir seleccionar una ubicación en el mapa
+            googleMap?.setOnMapClickListener { latLng ->
+                // Limpiar marcadores anteriores
+                googleMap?.clear()
+                // Añadir un nuevo marcador
+                googleMap?.addMarker(MarkerOptions().position(latLng))
+                // Guardar la ubicación seleccionada
+                selectedLocation = latLng
+            }
+        }
+    }
 }
 
