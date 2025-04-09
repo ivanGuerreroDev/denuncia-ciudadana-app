@@ -97,14 +97,6 @@
 
                 android:contentDescription="@string/boton_denuncia_ruido"
                 android:src="@drawable/ic_ear" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:layout_marginTop="8dp"
-                android:text="@string/denunciar_ruido"
-                android:textColor="?android:attr/textColor"
-                android:textSize="16sp" />
         </LinearLayout>
 
         <LinearLayout

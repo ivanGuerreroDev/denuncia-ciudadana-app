@@ -88,11 +88,16 @@ class MainActivity : AppCompatActivity() {
     fun openDamageActivity(view: View) {
         Log.d(TAG, "Opening DamageActivity")
         val intent = Intent(this, DamageActivity::class.java)
+        startActivity(intent)
+    }
 
     fun openCrimeReport(view: View) {
         Log.d(TAG, "Opening CrimeReportActivity")
-        val intent = Intent(this, CrimeReportActivity::class.java )
-
+        val intent = Intent(this, CrimeReportActivity::class.java)
         startActivity(intent)
+    }
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: MainActivity resumed")
     }
 }
