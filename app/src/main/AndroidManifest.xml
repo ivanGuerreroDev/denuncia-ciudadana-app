@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" />
 
 
     <application
@@ -49,7 +51,13 @@
             android:name=".DecibelMeasurementActivity"
             android:exported="false" />
         <activity
+            android:name=".CameraCaptureActivity"
+            android:exported="false" />
+        <activity
             android:name=".CrimeReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RetratoHabladoActivity"
             android:exported="false" />
 
     </application>

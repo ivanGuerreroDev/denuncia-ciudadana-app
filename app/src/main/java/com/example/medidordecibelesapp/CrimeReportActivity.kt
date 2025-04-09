@@ -7,12 +7,16 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -20,6 +24,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -35,11 +45,18 @@ class CrimeReportActivity : AppCompatActivity() {
     private var attachFileUris: List<Uri> = emptyList()
     private lateinit var fullName: EditText
     private lateinit var identification: EditText
+    private lateinit var phoneNumber: EditText
+    private lateinit var locationField: EditText
     private lateinit var eventDescription: EditText
+    
+    // Variables para la ubicación
+    private var selectedLocation: LatLng? = null
+    private lateinit var locationDialog: AlertDialog
 
     companion object {
         private const val FILE_REQUEST_CODE = 123
         private const val PERMISSION_REQUEST_CODE = 456
+        private const val CAMERA_CAPTURE_REQUEST_CODE = 789
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +79,8 @@ class CrimeReportActivity : AppCompatActivity() {
             ?: throw NullPointerException("Could not find backButton")
         fullName = findViewById(R.id.fullName)
         identification = findViewById(R.id.identification)
+        phoneNumber = findViewById(R.id.phoneNumber)
+        locationField = findViewById(R.id.locationField)
         eventDescription = findViewById(R.id.eventsDescription)
         sentCrimeReportButton = findViewById(R.id.sentCrimeReportButton)
         attachEvidenceButton = findViewById(R.id.attachEvidenceButton)
@@ -79,7 +98,12 @@ class CrimeReportActivity : AppCompatActivity() {
             //sentData()
         }
         attachEvidenceButton.setOnClickListener {
-            checkAudioPermission()
+            showEvidenceOptionsModal()
+        }
+        
+        // Configurar el campo de ubicación para abrir el modal del mapa
+        locationField.setOnClickListener {
+            showLocationMapModal()
         }
 
     }
@@ -90,6 +114,8 @@ class CrimeReportActivity : AppCompatActivity() {
                 "accusationData" to listOf(
                     mapOf("key" to "fullName", "value" to fullName.text.toString()),
                     mapOf("key" to "identification", "value" to identification.text.toString()),
+                    mapOf("key" to "phoneNumber", "value" to phoneNumber.text.toString()),
+                    mapOf("key" to "location", "value" to locationField.text.toString()),
                     mapOf("key" to "eventDescription", "value" to eventDescription.text.toString())
                 )
             )
@@ -147,30 +173,61 @@ class CrimeReportActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == FILE_REQUEST_CODE && resultCode == RESULT_OK) {
-            val uris = mutableListOf<Uri>()
-            val fileNames = mutableListOf<String>()
+        if (resultCode == RESULT_OK) {
+            when (requestCode) {
+                FILE_REQUEST_CODE -> {
+                    val uris = mutableListOf<Uri>()
+                    val fileNames = mutableListOf<String>()
 
-            data?.let {
-                if (it.clipData != null) {
-                    val count = it.clipData!!.itemCount
-                    for (i in 0 until count) {
-                        val fileUri = it.clipData!!.getItemAt(i).uri
-                        uris.add(fileUri)
-                        fileNames.add(getFileName(fileUri))
+                    data?.let {
+                        if (it.clipData != null) {
+                            val count = it.clipData!!.itemCount
+                            for (i in 0 until count) {
+                                val fileUri = it.clipData!!.getItemAt(i).uri
+                                uris.add(fileUri)
+                                fileNames.add(getFileName(fileUri))
+                            }
+                        } else if (it.data != null) {
+                            val uri = it.data!!
+                            uris.add(uri)
+                            fileNames.add(getFileName(uri))
+                        }
                     }
-                } else if (it.data != null) {
-                    val uri = it.data!!
-                    uris.add(uri)
-                    fileNames.add(getFileName(uri))
-                }
-            }
 
-            if (uris.isNotEmpty()) {
-                attachFileUris = uris
-                val namesText = fileNames.joinToString(separator = "\n")
-                attachFileTextView.text = "Archivos seleccionados:\n$namesText"
-                Log.d("FileSelection", "URIs seleccionadas: $uris")
+                    if (uris.isNotEmpty()) {
+                        // Añadir los nuevos archivos a la lista existente
+                        val updatedUris = (attachFileUris + uris).distinct()
+                        attachFileUris = updatedUris
+                        
+                        // Obtener los nombres de todos los archivos seleccionados
+                        val allFileNames = updatedUris.map { getFileName(it) }
+                        val namesText = allFileNames.joinToString(separator = "\n")
+                        
+                        attachFileTextView.text = "Archivos seleccionados:\n$namesText"
+                        Log.d("FileSelection", "URIs seleccionadas: $updatedUris")
+                        Toast.makeText(this, "Archivo(s) añadido(s)", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                
+                CAMERA_CAPTURE_REQUEST_CODE -> {
+                    data?.getStringExtra("captured_media_uri")?.let { uriString ->
+                        val mediaUri = Uri.parse(uriString)
+                        
+                        // Añadir el nuevo archivo a la lista existente
+                        val updatedUris = (attachFileUris + mediaUri).distinct()
+                        attachFileUris = updatedUris
+                        
+                        // Obtener los nombres de todos los archivos seleccionados
+                        val allFileNames = updatedUris.map { getFileName(it) }
+                        val namesText = allFileNames.joinToString(separator = "\n")
+                        
+                        // Actualizar el texto mostrado con todos los archivos
+                        attachFileTextView.text = "Archivos seleccionados:\n$namesText"
+                        
+                        Log.d("CameraCapture", "Media capturada: $mediaUri")
+                        Toast.makeText(this, "Archivo añadido", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }
@@ -205,11 +262,119 @@ class CrimeReportActivity : AppCompatActivity() {
         if (result == null) {
             result = uri.path
             val cut = result?.lastIndexOf('/')
-            if (cut != -1 && cut!! >= 0) {
+            if (cut != -1 && cut != null) {
                 result = result?.substring(cut + 1)
             }
         }
-        return result ?: "archivo desconocido"
+        return result ?: "Archivo desconocido"
+    }
+    
+    private fun showEvidenceOptionsModal() {
+        val dialog = AlertDialog.Builder(this)
+            .setView(R.layout.modal_evidence_options)
+            .create()
+            
+        dialog.show()
+        
+        // Configurar los listeners para cada botón del modal
+        dialog.findViewById<Button>(R.id.btnCapturarCamara)?.setOnClickListener {
+            // Abrir la actividad de captura de cámara
+            val intent = Intent(this, CameraCaptureActivity::class.java)
+            startActivityForResult(intent, CAMERA_CAPTURE_REQUEST_CODE)
+            dialog.dismiss()
+        }
+        
+        dialog.findViewById<Button>(R.id.btnSeleccionarArchivo)?.setOnClickListener {
+            dialog.dismiss()
+            checkAudioPermission() // Reutilizamos la función existente para seleccionar archivos
+        }
+        
+        dialog.findViewById<Button>(R.id.btnRetratoHablado)?.setOnClickListener {
+            // Lanzar la actividad de Retrato Hablado
+            val intent = Intent(this, RetratoHabladoActivity::class.java)
+            startActivity(intent)
+            dialog.dismiss()
+        }
+    }
+    
+    private fun showLocationMapModal() {
+        try {
+            // Crear el diálogo con el layout del mapa
+            val dialogView = LayoutInflater.from(this).inflate(R.layout.modal_location_map, null)
+            
+            // Crear el diálogo con la vista inflada
+            locationDialog = AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+            
+            // Configurar los botones antes de mostrar el diálogo
+            dialogView.findViewById<Button>(R.id.btnCancelLocation)?.setOnClickListener {
+                locationDialog.dismiss()
+            }
+            
+            dialogView.findViewById<Button>(R.id.btnConfirmLocation)?.setOnClickListener {
+                // Guardar la ubicación seleccionada
+                selectedLocation?.let {
+                    locationField.setText("Lat: ${it.latitude}, Lng: ${it.longitude}")
+                }
+                locationDialog.dismiss()
+            }
+            
+            // Mostrar el diálogo
+            locationDialog.show()
+            
+            // Inicializar el mapa después de que el diálogo se muestre
+            val mapFragment = SupportMapFragment()
+            supportFragmentManager.beginTransaction()
+                .add(mapFragment, "mapFragment")
+                .commitNow() // Usar commitNow para asegurar que se complete inmediatamente
+            
+            // Reemplazar el contenedor del mapa con el fragmento
+            val mapContainer = dialogView.findViewById<FrameLayout>(R.id.mapLocation)
+            if (mapContainer != null) {
+                // Usar el childFragmentManager del fragmento para manejar el mapa
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.mapLocation, mapFragment)
+                    .commitNow() // Usar commitNow para asegurar que se complete inmediatamente
+                
+                mapFragment.getMapAsync(object : OnMapReadyCallback {
+                    override fun onMapReady(googleMap: GoogleMap) {
+                        // Configurar el mapa
+                        if (ActivityCompat.checkSelfPermission(this@CrimeReportActivity, 
+                                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                            googleMap.isMyLocationEnabled = true
+                        }
+                        
+                        // Si ya hay una ubicación seleccionada, mostrarla en el mapa
+                        selectedLocation?.let {
+                            googleMap.addMarker(MarkerOptions().position(it))
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(it, 15f))
+                        }
+                        
+                        // Permitir seleccionar una ubicación en el mapa
+                        googleMap.setOnMapClickListener { latLng ->
+                            // Limpiar marcadores anteriores
+                            googleMap.clear()
+                            // Añadir un nuevo marcador
+                            googleMap.addMarker(MarkerOptions().position(latLng))
+                            // Guardar la ubicación seleccionada
+                            selectedLocation = latLng
+                        }
+                    }
+                })
+            } else {
+                Log.e("CrimeReportActivity", "No se encontró el contenedor del mapa")
+                Toast.makeText(this@CrimeReportActivity, "Error al cargar el mapa", Toast.LENGTH_SHORT).show()
+                locationDialog.dismiss()
+            }
+        } catch (e: Exception) {
+            Log.e("CrimeReportActivity", "Error al inicializar el mapa: ${e.message}")
+            Toast.makeText(this@CrimeReportActivity, "Error al cargar el mapa", Toast.LENGTH_SHORT).show()
+            if (::locationDialog.isInitialized) {
+                locationDialog.dismiss()
+            }
+        }
     }
 
 }

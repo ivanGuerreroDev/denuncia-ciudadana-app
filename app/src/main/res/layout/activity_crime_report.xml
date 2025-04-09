@@ -48,7 +48,7 @@
             android:id="@+id/fullName"
             android:layout_width="match_parent"
             android:layout_height="85dp"
-            android:hint="Nombre Completo"
+            android:hint="¿Cual es su nombre?"
             android:importantForAutofill="no"
             android:inputType="textAutoCorrect"
             android:textColorHint="#757575"
@@ -58,9 +58,31 @@
             android:id="@+id/identification"
             android:layout_width="match_parent"
             android:layout_height="85dp"
-            android:hint="Cedula"
+            android:hint="Numero de identificacion"
             android:importantForAutofill="no"
             android:inputType="text"
+            android:textColorHint="#757575"
+            tools:ignore="HardcodedText,VisualLintTextFieldSize" />
+            
+        <EditText
+            android:id="@+id/phoneNumber"
+            android:layout_width="match_parent"
+            android:layout_height="85dp"
+            android:hint="Teléfono de contacto"
+            android:importantForAutofill="no"
+            android:inputType="phone"
+            android:textColorHint="#757575"
+            tools:ignore="HardcodedText,VisualLintTextFieldSize" />
+            
+        <EditText
+            android:id="@+id/locationField"
+            android:layout_width="match_parent"
+            android:layout_height="85dp"
+            android:hint="Ubicación del hecho"
+            android:focusable="false"
+            android:clickable="true"
+            android:importantForAutofill="no"
+            android:inputType="none"
             android:textColorHint="#757575"
             tools:ignore="HardcodedText,VisualLintTextFieldSize" />
 
@@ -85,35 +107,33 @@
             android:textSize="14sp"
             tools:ignore="HardcodedText,RtlHardcoded" />
 
-        <LinearLayout
+        <Button
+            android:id="@+id/attachEvidenceButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingTop="15dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/sentCrimeReportButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginEnd="20dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Enviar"
-                tools:ignore="ButtonStyle,HardcodedText" />
-
-            <Button
-                android:id="@+id/attachEvidenceButton"
-                android:layout_width="18dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="10dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="Adjuntar Evidencia"
-                tools:ignore="ButtonStyle,HardcodedText" />
-
-        </LinearLayout>
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="Adjuntar Evidencia"
+            tools:ignore="ButtonStyle,HardcodedText" />
+            
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+            
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/sentCrimeReportButton"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="20dp"
+            android:gravity="center"
+            android:text="Enviar"
+            android:textSize="16sp"
+            tools:ignore="ButtonStyle,HardcodedText" />
 
 
     </LinearLayout>

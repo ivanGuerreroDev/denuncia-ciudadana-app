@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Añadir Soportes"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btnCapturarCamara"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Capturar con cámara"
+        android:layout_marginBottom="8dp"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btnSeleccionarArchivo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Seleccionar archivo"
+        android:layout_marginBottom="8dp"
+        tools:ignore="HardcodedText" />
+
+    <Button
+        android:id="@+id/btnRetratoHablado"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Retrato hablado"
+        tools:ignore="HardcodedText" />
+
+</LinearLayout>
