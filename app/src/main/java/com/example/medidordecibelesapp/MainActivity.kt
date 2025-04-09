@@ -50,6 +50,9 @@ class MainActivity : AppCompatActivity() {
             val reportNoiseButton: ImageButton = findViewById(R.id.reportNoiseButton)
             reportNoiseButton.setOnClickListener { openDecibelMeasurement(it) }
 
+            val reportDamageButton: ImageButton = findViewById(R.id.reportDamageButton)
+            reportDamageButton.setOnClickListener { openDamageActivity(it) }
+
             Log.d(TAG, "onCreate: MainActivity setup complete")
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing MainActivity", e)
@@ -70,6 +73,12 @@ class MainActivity : AppCompatActivity() {
     fun openDecibelMeasurement(view: View) {
         Log.d(TAG, "Opening DecibelMeasurementActivity")
         val intent = Intent(this, DecibelMeasurementActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun openDamageActivity(view: View) {
+        Log.d(TAG, "Opening DamageActivity")
+        val intent = Intent(this, DamageActivity::class.java)
         startActivity(intent)
     }
 }
