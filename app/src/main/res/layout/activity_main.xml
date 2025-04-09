@@ -44,20 +44,22 @@
             android:textColor="?android:attr/textColor"
             tools:ignore="HarcodedText" />
 
+
         <LinearLayout
             android:id="@+id/reportNoiseContainer"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_height="133dp"
             android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center">
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:orientation="vertical">
 
             <ImageButton
                 android:id="@+id/reportNoiseButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackgroundBorderless"
+
                 android:contentDescription="@string/denunciar_ruido"
                 android:src="@drawable/ic_ear" />
 
@@ -92,8 +94,44 @@
                 android:layout_height="wrap_content"
                 android:text="@string/denunciar_da_o"
                 android:textSize="16sp"
+
+                android:contentDescription="@string/boton_denuncia_ruido"
+                android:src="@drawable/ic_ear" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
                 android:layout_marginTop="8dp"
-                android:textColor="?android:attr/textColor" />
+                android:text="@string/denunciar_ruido"
+                android:textColor="?android:attr/textColor"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/crimeReportContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="133dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageButton
+                android:id="@+id/reportCrimeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/boton_denuncia_delitos"
+                android:src="@drawable/ic_crime" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/denuncia_delito"
+                android:textColor="?android:attr/textColor"
+                android:textSize="16sp" />
+
         </LinearLayout>
 
     </LinearLayout>

@@ -25,6 +25,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
+
             <ImageButton
                 android:id="@+id/backButton"
                 android:layout_width="48dp"

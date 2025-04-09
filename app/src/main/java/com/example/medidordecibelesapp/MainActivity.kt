@@ -1,5 +1,6 @@
 package com.example.medidordecibelesapp
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "MainActivity"
     private val sharedPreferencesFile = "AppThemePrefs"
     private val themeKey = "isDarkTheme"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,10 +52,16 @@ class MainActivity : AppCompatActivity() {
             val reportNoiseButton: ImageButton = findViewById(R.id.reportNoiseButton)
             reportNoiseButton.setOnClickListener { openDecibelMeasurement(it) }
 
+
             val reportDamageButton: ImageButton = findViewById(R.id.reportDamageButton)
             reportDamageButton.setOnClickListener { openDamageActivity(it) }
 
+            val reportCrimeButton: ImageButton = findViewById(R.id.reportCrimeButton)
+            reportCrimeButton.setOnClickListener { openCrimeReport(it)}
+
+
             Log.d(TAG, "onCreate: MainActivity setup complete")
+
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing MainActivity", e)
         }
@@ -76,9 +84,15 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+
     fun openDamageActivity(view: View) {
         Log.d(TAG, "Opening DamageActivity")
         val intent = Intent(this, DamageActivity::class.java)
+
+    fun openCrimeReport(view: View) {
+        Log.d(TAG, "Opening CrimeReportActivity")
+        val intent = Intent(this, CrimeReportActivity::class.java )
+
         startActivity(intent)
     }
 }
