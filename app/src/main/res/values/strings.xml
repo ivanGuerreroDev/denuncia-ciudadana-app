@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">Medidor Decibeles App</string>
     <string name="back_button_description">Volver</string>
-    <string name="denuncia_delito">Reportar Delito</string>
-    <string name="denunciar_ruido">Reportar Ruido</string>
+    <string name="denuncia_delito">¿Viste un delito? Repórtalo</string>
+    <string name="denunciar_ruido">Reporte de ruido excesivo</string>
 
-    <string name="denunciar_da_o">Reportar Daño o Peligro</string>
+    <string name="denunciar_da_o">Haz tu reporte urbano. ¿Algo roto o peligroso? ¡Avísanos!</string>
     <string name="denuncia_ciudadana_panam">Denuncia Ciudadana Panamá</string>
     <string name="capturar_foto">Capturar Foto</string>
     <string name="descripci_n_del_da_o">Descripción del daño</string>
@@ -14,4 +14,23 @@
     <string name="cambiar_tema">Cambiar Tema</string>
     <string name="boton_denuncia_ruido">Botton Denuncia Ruido</string>
 
+    <!-- Nuevas cadenas para la funcionalidad de emergencia -->
+    <string name="llamada_emergencia">Llamada de Emergencia</string>
+    <string name="emergencias">Emergencias (911)</string>
+    <string name="policia">Policía Nacional</string>
+    <string name="bomberos">Bomberos</string>
+    <string name="ambulancia">Cruz Roja</string>
+    <string name="sinaproc">Sinaproc (*335)</string>
+    <string name="attt">ATTT (511-9320)</string>
+    <string name="atencion_ciudadana">Atención Ciudadana (311)</string>
+    <string name="cerrar_drawer">Cerrar</string>
+    
+    <!-- Nuevas cadenas para la funcionalidad de reportes -->
+    <string name="reportes_realizados">Reportes realizados</string>
+    <string name="ver_reportes">Ver reportes realizados</string>
+    <string name="detalle_reporte">Detalle del Reporte</string>
+    <string name="datos_reporte">Datos del Reporte</string>
+    <string name="archivos_adjuntos">Archivos Adjuntos</string>
+    <string name="volver_lista">Volver a la lista</string>
+    <string name="no_reportes">No hay reportes disponibles</string>
 </resources>

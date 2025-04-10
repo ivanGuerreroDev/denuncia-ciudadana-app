@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -8,124 +8,242 @@
     android:background="?android:attr/windowBackground"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+            
+            <!-- Header con botón de tema -->
             <ImageButton
                 android:id="@+id/changeThemeButton"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:layout_alignParentEnd="true"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/cambiar_tema"
                 android:padding="12dp"
                 android:src="@drawable/icon_dark"
                 tools:ignore="HarcodedText" />
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/titleTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/denuncia_ciudadana_panam"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="?android:attr/textColor"
-            tools:ignore="HarcodedText" />
-
-
-        <LinearLayout
-            android:id="@+id/reportNoiseContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="133dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="32dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageButton
-                android:id="@+id/reportNoiseButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
-
-                android:contentDescription="@string/denunciar_ruido"
-                android:src="@drawable/ic_ear" />
-
+            
+            <!-- Título -->
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/titleTextView"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/denunciar_ruido"
-                android:textSize="16sp"
-                android:layout_marginTop="8dp"
-                android:textColor="?android:attr/textColor" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/reportDamageContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <ImageButton
-                android:id="@+id/reportDamageButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/denunciar_da_o"
-                android:src="@drawable/ic_damage" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/denunciar_da_o"
-                android:textSize="16sp"
-
-                android:contentDescription="@string/boton_denuncia_ruido"
-                android:src="@drawable/ic_ear" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/crimeReportContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="133dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="32dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageButton
-                android:id="@+id/reportCrimeButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/boton_denuncia_delitos"
-                android:src="@drawable/ic_crime" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/denuncia_delito"
+                android:layout_marginTop="42dp"
+                android:layout_below="@id/changeThemeButton"
+                android:text="@string/denuncia_ciudadana_panam"
+                android:textAlignment="center"
+                android:textSize="28sp"
+                android:textStyle="bold"
                 android:textColor="?android:attr/textColor"
-                android:textSize="16sp" />
+                tools:ignore="HarcodedText" />
 
-        </LinearLayout>
+            <!-- Botones de denuncia en formato grid -->
+            <GridLayout
+                android:id="@+id/gridButtons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/titleTextView"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="42dp"
+                android:columnCount="1"
+                android:useDefaultMargins="true"
+                android:alignmentMode="alignMargins">
 
-    </LinearLayout>
+                <!-- Card para denunciar ruido -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/reportNoiseCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/reportNoiseButton"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:padding="8dp"
+                            android:contentDescription="@string/denunciar_ruido"
+                            android:src="@drawable/ic_ear" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/denunciar_ruido"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="16dp"
+                            android:textColor="?android:attr/textColor" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Card para denunciar daño -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/reportDamageCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/reportDamageButton"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:padding="8dp"
+                            android:contentDescription="@string/denunciar_da_o"
+                            android:src="@drawable/ic_building" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/denunciar_da_o"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="16dp"
+                            android:textColor="?android:attr/textColor" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Card para denunciar delito -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/crimeReportCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/reportCrimeButton"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:padding="8dp"
+                            android:contentDescription="@string/boton_denuncia_delitos"
+                            android:src="@drawable/ic_crime" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/denuncia_delito"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="16dp"
+                            android:textColor="?android:attr/textColor" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+                
+                <!-- Card para ver reportes realizados -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/reportsListCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="4dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:id="@+id/reportsListButton"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:padding="8dp"
+                            android:contentDescription="@string/ver_reportes"
+                            android:src="@drawable/ic_list" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/reportes_realizados"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:layout_marginStart="16dp"
+                            android:textColor="?android:attr/textColor" />
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </GridLayout>
+
+            <!-- Botón de emergencia -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/emergencyButton"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_alignParentBottom="true"
+                android:text="@string/llamada_emergencia"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
+                app:icon="@drawable/ic_emergency"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"
+                app:iconSize="24dp"
+                app:backgroundTint="#F44336" />
+            
+        </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Overlay negro semi-transparente para cuando el drawer está abierto -->
+    <View
+        android:id="@+id/overlayView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- BottomSheet para el panel de emergencia -->
+    <include 
+        android:id="@+id/emergency_drawer_include"
+        layout="@layout/emergency_drawer" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/emergencyDrawer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="?android:attr/windowBackground"
+    android:padding="16dp"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="0dp"
+    app:behavior_skipCollapsed="true"
+    app:behavior_fitToContents="true"
+    app:behavior_draggable="true">
+
+    <!-- Indicador de arrastre en la parte superior -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="5dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="8dp"
+        android:background="#A0A0A0"
+        android:backgroundTint="?android:attr/textColorSecondary" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/llamada_emergencia"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:layout_marginBottom="16dp"
+        android:textColor="?android:attr/textColor" />
+
+    <!-- ScrollView para permitir desplazamiento - ajustada la altura para que muestre todo el contenido -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:minHeight="350dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Emergencias (911) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/emergencyServiceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?android:attr/windowBackground"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_phone"
+                        android:tint="#F44336"
+                        android:contentDescription="@string/emergencias" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/emergencias"
+                        android:textSize="18sp"
+                        android:layout_marginStart="16dp"
+                        android:textColor="?android:attr/textColor" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Policía -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/policeServiceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?android:attr/windowBackground"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_phone"
+                        android:tint="#3F51B5"
+                        android:contentDescription="@string/policia" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/policia"
+                        android:textSize="18sp"
+                        android:layout_marginStart="16dp"
+                        android:textColor="?android:attr/textColor" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Bomberos -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/fireServiceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?android:attr/windowBackground"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_phone"
+                        android:tint="#FF9800"
+                        android:contentDescription="@string/bomberos" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/bomberos"
+                        android:textSize="18sp"
+                        android:layout_marginStart="16dp"
+                        android:textColor="?android:attr/textColor" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Ambulancia -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/ambulanceServiceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?android:attr/windowBackground"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_phone"
+                        android:tint="#4CAF50"
+                        android:contentDescription="@string/ambulancia" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/ambulancia"
+                        android:textSize="18sp"
+                        android:layout_marginStart="16dp"
+                        android:textColor="?android:attr/textColor" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Sinaproc -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/sinaprocServiceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?android:attr/windowBackground"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_phone"
+                        android:tint="#009688"
+                        android:contentDescription="@string/sinaproc" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/sinaproc"
+                        android:textSize="18sp"
+                        android:layout_marginStart="16dp"
+                        android:textColor="?android:attr/textColor" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ATTT -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/atttServiceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?android:attr/windowBackground"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_phone"
+                        android:tint="#795548"
+                        android:contentDescription="@string/attt" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/attt"
+                        android:textSize="18sp"
+                        android:layout_marginStart="16dp"
+                        android:textColor="?android:attr/textColor" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Atención Ciudadana -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/atencionCiudadanaServiceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?android:attr/windowBackground"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_phone"
+                        android:tint="#673AB7"
+                        android:contentDescription="@string/atencion_ciudadana" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/atencion_ciudadana"
+                        android:textSize="18sp"
+                        android:layout_marginStart="16dp"
+                        android:textColor="?android:attr/textColor" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Espacio adicional para asegurar scrolling -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="16dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

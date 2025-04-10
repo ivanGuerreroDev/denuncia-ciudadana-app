@@ -95,6 +95,7 @@
                 android:clickable="true"
                 android:importantForAutofill="no"
                 android:inputType="none"
+                android:drawableEnd="@drawable/ic_location"
                 android:textColorHint="#757575"
                 tools:ignore="HardcodedText,VisualLintTextFieldSize" />
 

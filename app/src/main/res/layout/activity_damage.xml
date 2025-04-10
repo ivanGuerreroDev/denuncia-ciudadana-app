@@ -8,16 +8,48 @@
     android:layout_height="match_parent"
     tools:context=".DamageActivity"
     android:padding="16dp">
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="16dp">
 
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back_button_description"
+            android:src="@drawable/ic_back" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Reporte de Daño o Peligro"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:ignore="HardcodedText" />
+
+    </LinearLayout>
     <ImageView
         android:id="@+id/photoImageView"
         android:layout_width="0dp"
         android:layout_height="200dp"
         android:scaleType="centerCrop"
         android:background="#CCCCCC"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
 
     <Button
         android:id="@+id/capturePhotoButton"
@@ -41,12 +73,27 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
 
+    <EditText
+        android:id="@+id/locationField"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Ubicación del daño"
+        android:focusable="false"
+        android:clickable="true"
+        android:importantForAutofill="no"
+        android:inputType="none"
+        android:drawableEnd="@drawable/ic_location"
+        app:layout_constraintTop_toBottomOf="@id/descriptionEditText"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
+
     <Button
         android:id="@+id/submitReportButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Enviar Alerta"
-        app:layout_constraintTop_toBottomOf="@id/descriptionEditText"
+        app:layout_constraintTop_toBottomOf="@id/locationField"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="16dp" />
