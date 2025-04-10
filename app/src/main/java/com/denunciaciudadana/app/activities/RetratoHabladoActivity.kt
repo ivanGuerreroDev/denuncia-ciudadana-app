@@ -14,13 +14,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.denunciaciudadana.app.R
+import com.denunciaciudadana.app.api.ApiClient
+import com.denunciaciudadana.app.models.PortraitRequest
+import com.denunciaciudadana.app.models.PortraitResponse
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.lang.Exception
-import com.denunciaciudadana.app.R
 
 class RetratoHabladoActivity : AppCompatActivity() {
 
@@ -56,8 +60,12 @@ class RetratoHabladoActivity : AppCompatActivity() {
     private lateinit var edtCaracteristicasEspeciales: TextInputEditText
     
     private lateinit var btnGenerarRetrato: Button
+    private lateinit var btnAgregarAlReporte: Button
     private lateinit var imgRetrato: ImageView
     private lateinit var backButton: ImageButton
+    
+    // Variable para almacenar la URL del retrato generado
+    private var retratoUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,6 +114,7 @@ class RetratoHabladoActivity : AppCompatActivity() {
         edtCaracteristicasEspeciales = findViewById(R.id.edtCaracteristicasEspeciales)
         
         btnGenerarRetrato = findViewById(R.id.btnGenerarRetrato)
+        btnAgregarAlReporte = findViewById(R.id.btnAgregarAlReporte)
         imgRetrato = findViewById(R.id.imgRetrato)
         
         // Botón de regreso
@@ -117,6 +126,9 @@ class RetratoHabladoActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("RetratoHablado", "No se encontró el botón de regreso: ${e.message}")
         }
+        
+        // Inicialmente, el botón de añadir al reporte está oculto
+        btnAgregarAlReporte.visibility = View.GONE
     }
 
     private fun setupClickListeners() {
@@ -124,6 +136,10 @@ class RetratoHabladoActivity : AppCompatActivity() {
             if (validateForm()) {
                 generarRetrato()
             }
+        }
+        
+        btnAgregarAlReporte.setOnClickListener {
+            agregarRetratoAlReporte()
         }
     }
 
@@ -168,81 +184,107 @@ class RetratoHabladoActivity : AppCompatActivity() {
         // Mostrar progreso
         btnGenerarRetrato.isEnabled = false
         btnGenerarRetrato.text = "Generando..."
-
-        val jsonObject = JSONObject().apply {
-            // Rasgos faciales generales
-            put("genero", edtGenero.text.toString())
-            put("formaRostro", edtFormaRostro.text.toString())
-            put("ojos", edtOjos.text.toString())
-            put("nariz", edtNariz.text.toString())
-            put("boca", edtBoca.text.toString())
-            put("orejas", edtOrejas.text.toString())
-            
-            // Características del cabello
-            put("colorCabello", edtColorCabello.text.toString())
-            put("longitudCabello", edtLongitudCabello.text.toString())
-            put("estiloCabello", edtEstiloCabello.text.toString())
-            put("distribucionCabello", edtDistribucionCabello.text.toString())
-            
-            // Tez y características de la piel
-            put("colorPiel", edtColorPiel.text.toString())
-            put("marcasPiel", edtMarcasPiel.text.toString())
-            put("texturaPiel", edtTexturaPiel.text.toString())
-            
-            // Otras características distintivas
-            put("accesorios", edtAccesorios.text.toString())
-            put("velloFacial", edtVelloFacial.text.toString())
-            put("expresionFacial", edtExpresionFacial.text.toString())
-            
-            // Edad aproximada y contexto
-            put("edad", edtEdad.text.toString())
-            put("contextoVestimenta", edtContextoVestimenta.text.toString())
-            
-            // Características especiales adicionales
-            put("caracteristicasEspeciales", edtCaracteristicasEspeciales.text.toString())
-        }
-
-        val requestBody = jsonObject.toString().toRequestBody("application/json".toMediaType())
+        
+        // Crear el objeto PortraitRequest con los datos del formulario
+        val portraitRequest = PortraitRequest(
+            genero = edtGenero.text.toString(),
+            formaRostro = edtFormaRostro.text.toString(),
+            ojos = edtOjos.text.toString(),
+            nariz = edtNariz.text.toString(),
+            boca = edtBoca.text.toString(),
+            orejas = edtOrejas.text.toString(),
+            colorCabello = edtColorCabello.text.toString(),
+            longitudCabello = edtLongitudCabello.text.toString(),
+            estiloCabello = edtEstiloCabello.text.toString(),
+            distribucionCabello = edtDistribucionCabello.text.toString(),
+            colorPiel = edtColorPiel.text.toString(),
+            marcasPiel = edtMarcasPiel.text.toString(),
+            texturaPiel = edtTexturaPiel.text.toString(),
+            accesorios = edtAccesorios.text.toString(),
+            velloFacial = edtVelloFacial.text.toString(),
+            expresionFacial = edtExpresionFacial.text.toString(),
+            edad = edtEdad.text.toString(),
+            contextoVestimenta = edtContextoVestimenta.text.toString(),
+            caracteristicasEspeciales = edtCaracteristicasEspeciales.text.toString()
+        )
 
         lifecycleScope.launch {
             try {
-                // Aquí se haría la llamada real a la API
-                // val response: Response<RetratoResponse> = ApiClient.apiService.generarRetrato(requestBody)
+                // Llamada real a la API usando el servicio definido
+                val response = ApiClient.apiService.generatePortrait(portraitRequest)
                 
-                // Simulamos una respuesta exitosa para propósitos de demostración
-                // En una implementación real, procesaríamos la respuesta de la API
-                simulateSuccessResponse()
-                
+                if (response.isSuccessful && response.body() != null) {
+                    val portraitResponse = response.body()!!
+                    handleSuccessResponse(portraitResponse)
+                } else {
+                    Log.e("RetratoHablado", "Error en la respuesta: ${response.code()} - ${response.message()}")
+                    Toast.makeText(
+                        this@RetratoHabladoActivity,
+                        "Error al generar el retrato: ${response.message()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    resetButton()
+                }
             } catch (e: Exception) {
                 Log.e("RetratoHablado", "Error al generar retrato: ${e.message}")
-                Toast.makeText(this@RetratoHabladoActivity, "Error al generar el retrato", Toast.LENGTH_SHORT).show()
-                btnGenerarRetrato.isEnabled = true
-                btnGenerarRetrato.text = "Generar Retrato"
+                Toast.makeText(
+                    this@RetratoHabladoActivity,
+                    "Error al generar el retrato: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+                resetButton()
             }
         }
     }
 
-    private fun simulateSuccessResponse() {
-        // Esta función simula una respuesta exitosa de la API
-        // En una implementación real, procesaríamos la imagen recibida de la API
+    private fun resetButton() {
+        btnGenerarRetrato.isEnabled = true
+        btnGenerarRetrato.text = "Generar Retrato"
+    }
+
+    private fun handleSuccessResponse(portraitResponse: PortraitResponse) {
+        // Almacenar la URL del retrato generado
+        retratoUrl = portraitResponse.imageUrl
         
-        // Simulamos un retardo para dar sensación de procesamiento
-        android.os.Handler().postDelayed({
-            // Mostramos una imagen de ejemplo (en una implementación real, usaríamos la imagen de la API)
-            imgRetrato.visibility = View.VISIBLE
-            imgRetrato.setImageResource(R.drawable.ic_crime) // Usamos un icono existente como placeholder
-            
-            btnGenerarRetrato.isEnabled = true
-            btnGenerarRetrato.text = "Generar Retrato"
-            
-            // Creamos un intent con el resultado
+        // Mostrar la imagen recibida de la API
+        imgRetrato.visibility = View.VISIBLE
+        
+        // Cargar la imagen con Glide desde la URL proporcionada
+        Glide.with(this)
+            .load(portraitResponse.imageUrl)
+            .placeholder(R.drawable.ic_crime) // Mostrar placeholder mientras carga
+            .error(R.drawable.ic_crime) // Mostrar si hay error al cargar
+            .into(imgRetrato)
+        
+        resetButton()
+        
+        // Mostrar el botón para añadir al reporte
+        btnAgregarAlReporte.visibility = View.VISIBLE
+        
+        // Crear un intent con el resultado
+        val resultIntent = Intent()
+        resultIntent.putExtra("retrato_uri", portraitResponse.imageUrl)
+        resultIntent.putExtra("retrato_prompt", portraitResponse.prompt)
+        resultIntent.putExtra("retrato_fecha", portraitResponse.createdAt)
+        setResult(RESULT_OK, resultIntent)
+        
+        Toast.makeText(this, "Retrato generado con éxito", Toast.LENGTH_SHORT).show()
+        
+        // Registro en log para depuración
+        Log.d("RetratoHablado", "Retrato generado: ${portraitResponse.imageUrl}")
+        Log.d("RetratoHablado", "Prompt: ${portraitResponse.prompt}")
+    }
+    
+    private fun agregarRetratoAlReporte() {
+        if (retratoUrl != null) {
             val resultIntent = Intent()
-            // En una implementación real, guardaríamos la imagen y pasaríamos su URI
-            // Por ahora, pasamos un URI ficticio
-            resultIntent.putExtra("retrato_uri", Uri.parse("content://com.denunciaciudadana.app/retrato_generado"))
+            resultIntent.putExtra("retrato_uri", retratoUrl)
+            resultIntent.putExtra("add_to_report", true)
             setResult(RESULT_OK, resultIntent)
-            
-            Toast.makeText(this, "Retrato generado con éxito", Toast.LENGTH_SHORT).show()
-        }, 2000)
+            Toast.makeText(this, "Retrato añadido al reporte", Toast.LENGTH_SHORT).show()
+            finish()
+        } else {
+            Toast.makeText(this, "Error: No hay retrato para añadir", Toast.LENGTH_SHORT).show()
+        }
     }
 }

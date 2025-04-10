@@ -2,6 +2,8 @@ package com.denunciaciudadana.app.api
 
 import com.denunciaciudadana.app.models.Accusation
 import com.denunciaciudadana.app.models.AccusationResponse
+import com.denunciaciudadana.app.models.PortraitRequest
+import com.denunciaciudadana.app.models.PortraitResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -35,4 +37,13 @@ interface ApiService {
         @Path("id") id: Int,
         @Part audioFile: MultipartBody.Part
     ): Response<AccusationResponse>
+    
+    /**
+     * Generates a facial composite portrait based on provided facial features.
+     *
+     * @param request The portrait request containing facial feature details
+     * @return A Response object with the portrait generation response
+     */
+    @POST("portrait/generate")
+    suspend fun generatePortrait(@Body request: PortraitRequest): Response<PortraitResponse>
 }

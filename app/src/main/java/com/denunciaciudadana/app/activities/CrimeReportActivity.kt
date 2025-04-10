@@ -13,11 +13,14 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -25,6 +28,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.denunciaciudadana.app.activities.CameraCaptureActivity
 import com.denunciaciudadana.app.activities.RetratoHabladoActivity
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -57,6 +61,7 @@ class CrimeReportActivity : AppCompatActivity() {
         private const val FILE_REQUEST_CODE = 123
         private const val PERMISSION_REQUEST_CODE = 456
         private const val CAMERA_CAPTURE_REQUEST_CODE = 789
+        private const val RETRATO_HABLADO_REQUEST_CODE = 101
     }
     
     // UI components
@@ -65,6 +70,11 @@ class CrimeReportActivity : AppCompatActivity() {
     private lateinit var attachEvidenceButton: MaterialButton
     private lateinit var noFilesTextView: TextView
     private lateinit var attachedFilesRecyclerView: RecyclerView
+    
+    // Retrato hablado components
+    private lateinit var portraitCardView: CardView
+    private lateinit var portraitImageView: ImageView
+    private lateinit var removePortraitButton: ImageButton
     
     // Form fields
     private lateinit var fullNameField: EditText
@@ -77,6 +87,7 @@ class CrimeReportActivity : AppCompatActivity() {
     private lateinit var filesAdapter: AttachedFilesAdapter
     private var attachedFileUris: List<Uri> = emptyList()
     private var selectedLocation: LatLng? = null
+    private var retratoUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -122,6 +133,12 @@ class CrimeReportActivity : AppCompatActivity() {
             
             // RecyclerView
             attachedFilesRecyclerView = findViewById(R.id.attachedFilesRecyclerView)
+            
+            // Retrato hablado views
+            portraitCardView = findViewById(R.id.portraitCardView)
+            portraitImageView = findViewById(R.id.portraitImageView)
+            removePortraitButton = findViewById(R.id.removePortraitButton)
+            
         } catch (e: Exception) {
             Log.e(TAG, "Error initializing views", e)
             showErrorAndFinish("Error initializing UI components")
@@ -147,6 +164,10 @@ class CrimeReportActivity : AppCompatActivity() {
         
         locationField.setOnClickListener {
             showLocationMapDialog()
+        }
+        
+        removePortraitButton.setOnClickListener {
+            removePortrait()
         }
     }
     
@@ -179,7 +200,7 @@ class CrimeReportActivity : AppCompatActivity() {
      * Update visibility of files-related UI components.
      */
     private fun updateFilesVisibility() {
-        if (filesAdapter.getFiles().isEmpty()) {
+        if (filesAdapter.getFiles().isEmpty() && portraitCardView.visibility != View.VISIBLE) {
             noFilesTextView.visibility = View.VISIBLE
             attachedFilesRecyclerView.visibility = View.GONE
         } else {
@@ -197,13 +218,19 @@ class CrimeReportActivity : AppCompatActivity() {
         }
         
         try {
-            val accusationDataList = listOf(
+            val accusationDataList = mutableListOf(
                 AccusationDataItem("fullName", fullNameField.text.toString()),
                 AccusationDataItem("identification", identificationField.text.toString()),
                 AccusationDataItem("phoneNumber", phoneNumberField.text.toString()),
                 AccusationDataItem("location", locationField.text.toString()),
                 AccusationDataItem("eventDescription", eventDescriptionField.text.toString())
             )
+            
+            // Añadir el retrato si existe
+            retratoUrl?.let {
+                accusationDataList.add(AccusationDataItem("portrait", it))
+            }
+            
             val crimeAccusation = Accusation(
                 accusationTypeId = 1,
                 accusationData = accusationDataList
@@ -320,6 +347,10 @@ class CrimeReportActivity : AppCompatActivity() {
                 CAMERA_CAPTURE_REQUEST_CODE -> {
                     handleCameraCaptureResult(data)
                 }
+                
+                RETRATO_HABLADO_REQUEST_CODE -> {
+                    handleRetratoHabladoResult(data)
+                }
             }
         }
     }
@@ -360,6 +391,47 @@ class CrimeReportActivity : AppCompatActivity() {
             addFilesToAdapter(listOf(mediaUri))
             showToast("Archivo añadido")
         }
+    }
+    
+    /**
+     * Process results from retrato hablado activity.
+     */
+    private fun handleRetratoHabladoResult(data: Intent?) {
+        val shouldAddToReport = data?.getBooleanExtra("add_to_report", false) ?: false
+        if (shouldAddToReport) {
+            data?.getStringExtra("retrato_uri")?.let { retratoUrlString ->
+                retratoUrl = retratoUrlString
+                displayPortrait(retratoUrlString)
+                showToast("Retrato añadido al reporte")
+            }
+        }
+    }
+    
+    /**
+     * Display the portrait in the card view.
+     */
+    private fun displayPortrait(portraitUrl: String) {
+        portraitCardView.visibility = View.VISIBLE
+        
+        // Cargar la imagen con Glide
+        Glide.with(this)
+            .load(portraitUrl)
+            .placeholder(R.drawable.ic_crime)
+            .error(R.drawable.ic_crime)
+            .into(portraitImageView)
+            
+        // Actualizar la visibilidad de la sección de archivos
+        updateFilesVisibility()
+    }
+    
+    /**
+     * Remove portrait from the report.
+     */
+    private fun removePortrait() {
+        retratoUrl = null
+        portraitCardView.visibility = View.GONE
+        updateFilesVisibility()
+        showToast("Retrato eliminado")
     }
     
     /**
@@ -456,7 +528,7 @@ class CrimeReportActivity : AppCompatActivity() {
      */
     private fun openRetratoHablado() {
         val intent = Intent(this, RetratoHabladoActivity::class.java)
-        startActivity(intent)
+        startActivityForResult(intent, RETRATO_HABLADO_REQUEST_CODE)
     }
     
     /**
