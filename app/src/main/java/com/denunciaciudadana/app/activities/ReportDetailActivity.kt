@@ -145,14 +145,31 @@ class ReportDetailActivity : AppCompatActivity() {
      */
     private fun formatDate(dateStr: String): String {
         try {
-            val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+            // Handle ISO 8601 format (e.g., "2025-04-10T13:45:30.634Z")
+            val inputFormat = if (dateStr.contains("T") && (dateStr.contains("Z") || dateStr.contains("+"))) {
+                java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.getDefault()).apply {
+                    timeZone = java.util.TimeZone.getTimeZone("UTC")
+                }
+            } else {
+                java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+            }
+            
             val outputFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
             
             val parsedDate = inputFormat.parse(dateStr)
             return parsedDate?.let { outputFormat.format(it) } ?: dateStr
         } catch (e: Exception) {
-            Log.e(TAG, "Error formatting date", e)
-            return dateStr
+            Log.e(TAG, "Error formatting date: $dateStr", e)
+            // Try alternative ISO format if first attempt fails
+            try {
+                val alternativeFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", java.util.Locale.getDefault())
+                val parsedDate = alternativeFormat.parse(dateStr)
+                val outputFormat = java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+                return parsedDate?.let { outputFormat.format(it) } ?: dateStr
+            } catch (e2: Exception) {
+                Log.e(TAG, "Error with alternative date format", e2)
+                return dateStr
+            }
         }
     }
     

@@ -367,7 +367,7 @@ class CrimeReportActivity : AppCompatActivity() {
             val report = Report(
                 id = reportId,
                 timestamp = timestamp,
-                status = "sent",  // Initial status is "sent" since we've sent it to the server
+                status = "enviado",  // Initial status is "sent" since we've sent it to the server
                 accusationData = accusationData,
                 attachments = attachments
             )
