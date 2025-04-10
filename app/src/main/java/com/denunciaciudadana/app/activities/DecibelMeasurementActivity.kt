@@ -41,6 +41,7 @@ import com.denunciaciudadana.app.database.DBHelper
 import com.denunciaciudadana.app.models.AccusationDataItem
 import com.denunciaciudadana.app.models.Accusation
 import com.denunciaciudadana.app.models.AccusationResponse
+import com.denunciaciudadana.app.models.Report
 
 class DecibelMeasurementActivity : AppCompatActivity() {
 
@@ -392,18 +393,71 @@ class DecibelMeasurementActivity : AppCompatActivity() {
 
         // Segunda petición para subir el archivo de audio usando coroutines
         lifecycleScope.launch {
+            var success = false
             try {
                 val response = ApiClient.apiService.uploadAudioFile(accusationId, audioPart)
-                if (response.isSuccessful) {
+                success = response.isSuccessful
+                
+                if (success) {
                     handleApiSuccess("Reporte de ruido enviado correctamente")
+                    
+                    // Guardar el reporte en la base de datos local
+                    saveReportToLocalDB(accusationId.toString(), file.absolutePath)
+                    
+                    // Volver a la pantalla anterior después de guardar el reporte
+                    runOnUiThread {
+                        Toast.makeText(applicationContext, "Reporte enviado con éxito", Toast.LENGTH_SHORT).show()
+                        finish() // Cierra la actividad actual y vuelve a la anterior
+                    }
                 } else {
                     handleApiError("Error al subir el archivo de audio: ${response.code()}")
                 }
             } catch (e: Exception) {
+                success = false
                 handleApiError("Error de red al subir el audio: ${e.message}")
             } finally {
-                resetRecordingState()
+                if (!success) {
+                    resetRecordingState()
+                }
             }
+        }
+    }
+
+    /**
+     * Guarda el reporte de ruido en la base de datos local
+     * 
+     * @param reportId ID del reporte generado en el servidor
+     * @param audioFilePath Ruta del archivo de audio grabado
+     */
+    private fun saveReportToLocalDB(reportId: String, audioFilePath: String) {
+        try {
+            // Crear datos de acusación con la información relevante
+            val accusationData = listOf(
+                AccusationDataItem("decibels_measurement", currentDecibels.toString()),
+                AccusationDataItem("ubication", "${currentLocation?.latitude ?: 0},${currentLocation?.longitude ?: 0}")
+            )
+            
+            // Crear una lista de adjuntos con la ruta del archivo de audio
+            val attachments = listOf(audioFilePath)
+            
+            // Obtener la fecha y hora actual
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val timestamp = dateFormat.format(Date())
+            
+            // Crear el objeto Report
+            val report = Report(
+                id = reportId,
+                timestamp = timestamp,
+                status = "Enviado",  // Estado inicial del reporte
+                accusationData = accusationData,
+                attachments = attachments
+            )
+            
+            // Guardar en la base de datos local
+            dbHelper.saveReport(report)
+            Log.d("DecibelMeasurement", "Reporte guardado localmente con ID: $reportId")
+        } catch (e: Exception) {
+            Log.e("DecibelMeasurement", "Error guardando reporte localmente: ${e.message}", e)
         }
     }
 

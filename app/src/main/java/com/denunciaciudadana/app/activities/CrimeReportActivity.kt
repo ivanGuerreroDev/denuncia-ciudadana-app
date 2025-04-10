@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.denunciaciudadana.app.activities.CameraCaptureActivity
 import com.denunciaciudadana.app.activities.RetratoHabladoActivity
+import com.denunciaciudadana.app.database.DBHelper
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -48,6 +49,11 @@ import com.denunciaciudadana.app.R
 import com.denunciaciudadana.app.models.Accusation
 import com.denunciaciudadana.app.models.AccusationDataItem
 import com.denunciaciudadana.app.models.AccusationResponse
+import com.denunciaciudadana.app.models.Report
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 
 /**
  * Activity for reporting crime incidents.
@@ -217,6 +223,14 @@ class CrimeReportActivity : AppCompatActivity() {
             return
         }
         
+        // Mostrar diálogo de progreso mientras se envían los datos
+        val progressDialog = AlertDialog.Builder(this)
+            .setTitle("Enviando")
+            .setMessage("Enviando reporte, por favor espere...")
+            .setCancelable(false)
+            .create()
+        progressDialog.show()
+        
         try {
             val accusationDataList = mutableListOf(
                 AccusationDataItem("fullName", fullNameField.text.toString()),
@@ -238,16 +252,133 @@ class CrimeReportActivity : AppCompatActivity() {
             // Send API request
             lifecycleScope.launch {
                 try {
+                    // Primero enviamos la acusación principal
                     val response: Response<AccusationResponse> = ApiClient.apiService.sendAccusation(crimeAccusation)
-                    handleApiResponse(response)
+                    
+                    if (response.isSuccessful) {
+                        val accusationId = response.body()?.data?.id
+                        if (accusationId != null && attachedFileUris.isNotEmpty()) {
+                            // Actualizar mensaje de progreso
+                            runOnUiThread {
+                                progressDialog.setMessage("Subiendo archivos adjuntos (0/${attachedFileUris.size})...")
+                            }
+                            
+                            // Subir cada archivo adjunto
+                            var allFilesUploaded = true
+                            var filesUploaded = 0
+                            
+                            // Lista para guardar las rutas de los archivos adjuntos
+                            val attachmentPaths = mutableListOf<String>()
+                            
+                            for ((index, fileUri) in attachedFileUris.withIndex()) {
+                                try {
+                                    // Actualizar mensaje con el progreso
+                                    runOnUiThread {
+                                        progressDialog.setMessage("Subiendo archivos adjuntos (${index+1}/${attachedFileUris.size})...")
+                                    }
+                                    
+                                    val uploadResult = uploadFile(accusationId, fileUri)
+                                    if (uploadResult) {
+                                        filesUploaded++
+                                        
+                                        // Añadir la ruta del archivo a la lista de adjuntos para guardar en la base de datos local
+                                        fileUri.toString().let { path ->
+                                            attachmentPaths.add(path)
+                                        }
+                                    } else {
+                                        allFilesUploaded = false
+                                        Log.e(TAG, "Error al subir archivo: $fileUri")
+                                    }
+                                } catch (e: Exception) {
+                                    allFilesUploaded = false
+                                    Log.e(TAG, "Excepción al subir archivo: ${e.message}", e)
+                                }
+                            }
+                            
+                            // Guardar el reporte en la base de datos local
+                            saveReportToLocalDatabase(accusationDataList, attachmentPaths, accusationId)
+                            
+                            // Mostrar mensaje según si todos los archivos se subieron correctamente
+                            val finalMessage = if (allFilesUploaded) {
+                                "Reporte enviado con éxito"
+                            } else {
+                                "Reporte enviado, pero solo se pudieron subir $filesUploaded de ${attachedFileUris.size} archivos"
+                            }
+                            
+                            // Ocultar diálogo de progreso y mostrar mensaje de éxito antes de terminar
+                            runOnUiThread {
+                                progressDialog.dismiss()
+                                showSuccessAndFinish(finalMessage)
+                            }
+                        } else {
+                            // No hay archivos adjuntos, guardamos el reporte sin adjuntos
+                            saveReportToLocalDatabase(accusationDataList, emptyList(), accusationId)
+                            
+                            // No hay archivos adjuntos, mostrar éxito directamente
+                            runOnUiThread {
+                                progressDialog.dismiss()
+                                showSuccessAndFinish("Reporte enviado con éxito")
+                            }
+                        }
+                    } else {
+                        Log.e(TAG, "Error: ${response.code()} - ${response.errorBody()?.string()}")
+                        runOnUiThread {
+                            progressDialog.dismiss()
+                            showError("Error: ${response.code()}")
+                        }
+                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "Exception sending report: ${e.message}", e)
-                    showError("Error al enviar reporte: ${e.message}")
+                    runOnUiThread {
+                        progressDialog.dismiss()
+                        showError("Error al enviar reporte: ${e.message}")
+                    }
                 }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error preparing report data", e)
+            progressDialog.dismiss()
             showError("Error al preparar los datos del reporte")
+        }
+    }
+    
+    /**
+     * Save the report to the local database for offline access.
+     * 
+     * @param accusationData The list of data items in the report
+     * @param attachments The list of attachment file paths
+     * @param serverId The server ID of the report (if available)
+     */
+    private fun saveReportToLocalDatabase(
+        accusationData: List<AccusationDataItem>, 
+        attachments: List<String>, 
+        serverId: Int?
+    ) {
+        try {
+            // Generate a unique ID for the report
+            val reportId = serverId?.toString() ?: UUID.randomUUID().toString()
+            
+            // Get current timestamp in a standardized format
+            val timestamp = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
+                .apply { timeZone = java.util.TimeZone.getTimeZone("UTC") }
+                .format(Date())
+            
+            // Create a Report object
+            val report = Report(
+                id = reportId,
+                timestamp = timestamp,
+                status = "sent",  // Initial status is "sent" since we've sent it to the server
+                accusationData = accusationData,
+                attachments = attachments
+            )
+            
+            // Save to local database
+            val dbHelper = DBHelper(this)
+            dbHelper.saveReport(report)
+            Log.d(TAG, "Report saved to local database with ID: $reportId")
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving report to local database: ${e.message}", e)
         }
     }
     
@@ -577,6 +708,56 @@ class CrimeReportActivity : AppCompatActivity() {
     private fun showSuccessAndFinish(message: String) {
         showToast(message)
         finish()
+    }
+
+    /**
+     * Upload a file to the server for a given accusation ID.
+     * 
+     * @param accusationId The ID of the accusation to attach the file to
+     * @param fileUri The URI of the file to upload
+     * @return True if upload was successful, false otherwise
+     */
+    private suspend fun uploadFile(accusationId: Int, fileUri: Uri): Boolean {
+        try {
+            // Obtener el nombre del archivo
+            val fileName = getFileName(fileUri)
+            Log.d(TAG, "Subiendo archivo: $fileName para acusación: $accusationId")
+            
+            // Preparar el archivo para envío
+            val inputStream = contentResolver.openInputStream(fileUri) ?: return false
+            val bytes = inputStream.readBytes()
+            inputStream.close()
+            
+            // Determinar el tipo MIME
+            val mimeType = contentResolver.getType(fileUri) ?: "application/octet-stream"
+            
+            // Crear MultipartBody.Part para el archivo
+            val requestFile = okhttp3.RequestBody.create(
+                mimeType.toMediaType(),
+                bytes
+            )
+            
+            val filePart = okhttp3.MultipartBody.Part.createFormData(
+                "file", // Nombre del parámetro esperado por el servidor
+                fileName, 
+                requestFile
+            )
+            
+            // Enviar archivo a la API
+            val response = ApiClient.apiService.uploadAudioFile(accusationId, filePart)
+            
+            return if (response.isSuccessful) {
+                Log.d(TAG, "Archivo subido con éxito: $fileName")
+                true
+            } else {
+                Log.e(TAG, "Error al subir archivo: ${response.code()} - ${response.errorBody()?.string()}")
+                false
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Excepción al subir archivo: ${e.message}", e)
+            return false
+        }
     }
 
     /**

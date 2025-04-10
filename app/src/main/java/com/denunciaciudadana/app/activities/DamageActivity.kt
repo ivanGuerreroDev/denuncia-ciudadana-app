@@ -16,7 +16,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.lifecycleScope
 import com.denunciaciudadana.app.R
+import com.denunciaciudadana.app.api.ApiClient
+import com.denunciaciudadana.app.database.DBHelper
+import com.denunciaciudadana.app.models.Accusation
+import com.denunciaciudadana.app.models.AccusationDataItem
+import com.denunciaciudadana.app.models.AccusationResponse
+import com.denunciaciudadana.app.models.Report
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -24,7 +31,13 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class DamageActivity : AppCompatActivity() {
 
@@ -142,19 +155,13 @@ class DamageActivity : AppCompatActivity() {
     private fun submitDamageReport() {
         val description = descriptionEditText.text.toString()
 
-        if (photoUri == null) {
+        if (photoFile == null || photoUri == null) {
             Toast.makeText(this, "Falta capturar la foto", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Usar la ubicación seleccionada si está disponible, sino usar la ubicación actual
-        val locationToUse = if (selectedLocation != null) {
-            // Ya tenemos una ubicación seleccionada del mapa
-            "Lat: ${selectedLocation?.latitude}, Lng: ${selectedLocation?.longitude}"
-        } else if (currentLocation != null) {
-            // O usando la ubicación actual
-            "Lat: ${currentLocation!!.latitude}, Lng: ${currentLocation!!.longitude}"
-        } else {
+        // Validar que tengamos una ubicación
+        if (selectedLocation == null && currentLocation == null) {
             Toast.makeText(this, "No se pudo obtener ubicación", Toast.LENGTH_SHORT).show()
             return
         }
@@ -164,9 +171,182 @@ class DamageActivity : AppCompatActivity() {
             return
         }
 
-        Toast.makeText(this, "¡Alerta enviada!\nUbicación: $locationToUse", Toast.LENGTH_LONG).show()
+        // Mostrar diálogo de progreso mientras se envían los datos
+        val progressDialog = android.app.ProgressDialog(this).apply {
+            setTitle("Enviando")
+            setMessage("Enviando reporte, por favor espere...")
+            setCancelable(false)
+            show()
+        }
 
-        // Aquí podrías guardar en Firebase, SQLite, o enviar al servidor
+        try {
+            // Obtener datos de ubicación
+            val locationString = if (selectedLocation != null) {
+                "${selectedLocation!!.latitude},${selectedLocation!!.longitude}"
+            } else {
+                "${currentLocation!!.latitude},${currentLocation!!.longitude}"
+            }
+
+            // Crear lista de datos para la acusación
+            val accusationDataList = mutableListOf(
+                AccusationDataItem("location", locationString),
+                AccusationDataItem("description", description)
+            )
+            
+            // Crear objeto para la petición con accusationTypeId = 3 para daños
+            val damageAccusation = Accusation(
+                accusationTypeId = 3,
+                accusationData = accusationDataList
+            )
+
+            // Enviar datos al servidor usando lifecycleScope para manejar la coroutine
+            lifecycleScope.launch {
+                try {
+                    // Primero enviamos la acusación principal
+                    val response = ApiClient.apiService.sendAccusation(damageAccusation)
+                    
+                    if (response.isSuccessful) {
+                        val accusationId = response.body()?.data?.id
+                        if (accusationId != null && photoFile != null) {
+                            // Actualizar mensaje de progreso
+                            progressDialog.setMessage("Subiendo foto...")
+                            
+                            // Subir la foto
+                            val uploadResult = uploadPhotoFile(accusationId, photoFile!!)
+                            
+                            runOnUiThread {
+                                progressDialog.dismiss()
+                                if (uploadResult) {
+                                    // Guardar el reporte en la base de datos local
+                                    saveReportToLocalDatabase(accusationId.toString(), accusationDataList, photoUri.toString())
+                                    showSuccessAndFinish("¡Reporte enviado con éxito!")
+                                } else {
+                                    // Guardar el reporte en la base de datos local sin la foto
+                                    saveReportToLocalDatabase(accusationId.toString(), accusationDataList, null)
+                                    showSuccessAndFinish("¡Reporte enviado, pero hubo un problema al subir la foto!")
+                                }
+                            }
+                        } else {
+                            // No hay archivo de foto o no se recibió ID
+                            runOnUiThread {
+                                progressDialog.dismiss()
+                                if (accusationId != null) {
+                                    // Guardar el reporte en la base de datos local
+                                    saveReportToLocalDatabase(accusationId.toString(), accusationDataList, null)
+                                }
+                                showSuccessAndFinish("¡Reporte enviado correctamente!")
+                            }
+                        }
+                    } else {
+                        val errorBody = response.errorBody()?.string() ?: "Error desconocido"
+                        Log.e("DamageActivity", "Error: ${response.code()} - $errorBody")
+                        runOnUiThread {
+                            progressDialog.dismiss()
+                            Toast.makeText(this@DamageActivity, 
+                                "Error: ${response.code()}", 
+                                Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.e("DamageActivity", "Excepción al enviar reporte: ${e.message}", e)
+                    runOnUiThread {
+                        progressDialog.dismiss()
+                        Toast.makeText(this@DamageActivity, 
+                            "Error al enviar reporte: ${e.message}", 
+                            Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("DamageActivity", "Error al preparar datos de reporte", e)
+            progressDialog.dismiss()
+            Toast.makeText(this, "Error al preparar los datos del reporte", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    /**
+     * Sube un archivo de foto al servidor para una acusación específica.
+     * 
+     * @param accusationId El ID de la acusación a la que se adjuntará la foto
+     * @param photoFile El archivo de foto a subir
+     * @return true si la carga fue exitosa, false en caso contrario
+     */
+    private suspend fun uploadPhotoFile(accusationId: Int, photoFile: File): Boolean {
+        return try {
+            // Obtener el nombre del archivo
+            val fileName = photoFile.name
+            Log.d("DamageActivity", "Subiendo foto: $fileName para acusación: $accusationId")
+            
+            // Determinar el tipo MIME para la imagen
+            val mimeType = "image/jpeg"
+            
+            // Crear MultipartBody.Part para el archivo
+            val requestFile = photoFile.asRequestBody(mimeType.toMediaTypeOrNull())
+            
+            val filePart = MultipartBody.Part.createFormData(
+                "file", // Nombre del parámetro esperado por el servidor
+                fileName, 
+                requestFile
+            )
+            
+            // Enviar archivo a la API
+            val response = ApiClient.apiService.uploadAudioFile(accusationId, filePart)
+            
+            if (response.isSuccessful) {
+                Log.d("DamageActivity", "Foto subida con éxito: $fileName")
+                true
+            } else {
+                Log.e("DamageActivity", "Error al subir foto: ${response.code()} - ${response.errorBody()?.string()}")
+                false
+            }
+            
+        } catch (e: Exception) {
+            Log.e("DamageActivity", "Excepción al subir foto: ${e.message}", e)
+            false
+        }
+    }
+    
+    /**
+     * Muestra un mensaje de éxito y finaliza la actividad.
+     */
+    private fun showSuccessAndFinish(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        finish()
+    }
+
+    /**
+     * Guarda el reporte en la base de datos local.
+     *
+     * @param accusationId El ID del reporte.
+     * @param accusationDataList La lista de datos del reporte.
+     * @param photoUri La URI de la foto, si está disponible.
+     */
+    private fun saveReportToLocalDatabase(accusationId: String, accusationDataList: List<AccusationDataItem>, photoUri: String?) {
+        try {
+            // Crear la lista de adjuntos (puede estar vacía)
+            val attachments = if (photoUri != null) listOf(photoUri) else emptyList()
+            
+            // Obtener la fecha y hora actual
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+            val timestamp = dateFormat.format(Date())
+            
+            // Crear el objeto Report
+            val report = Report(
+                id = accusationId,
+                timestamp = timestamp,
+                status = "Enviado",  // Estado inicial del reporte
+                accusationData = accusationDataList,
+                attachments = attachments
+            )
+            
+            // Crear instancia del DBHelper y guardar el reporte
+            val dbHelper = DBHelper(this)
+            dbHelper.saveReport(report)
+            
+            Log.d("DamageActivity", "Reporte guardado localmente con ID: $accusationId")
+        } catch (e: Exception) {
+            Log.e("DamageActivity", "Error guardando reporte localmente: ${e.message}", e)
+        }
     }
 
     // Permisos concedidos o denegados
