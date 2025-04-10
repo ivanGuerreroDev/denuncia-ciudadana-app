@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.activities
+package com.denunciaciudadana.app.activities
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -18,7 +18,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.medidordecibelesapp.R
+import com.denunciaciudadana.app.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class MainActivity : AppCompatActivity() {

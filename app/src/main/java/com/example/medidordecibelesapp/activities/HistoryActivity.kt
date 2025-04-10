@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.activities
+package com.denunciaciudadana.app.activities
 
 import android.os.Bundle
 import android.view.Gravity
@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import android.widget.LinearLayout
-import com.example.medidordecibelesapp.R
+import com.denunciaciudadana.app.R
 
 class HistoryActivity : AppCompatActivity() {
 

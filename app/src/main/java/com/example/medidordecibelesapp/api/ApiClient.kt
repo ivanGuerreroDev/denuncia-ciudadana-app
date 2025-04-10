@@ -1,7 +1,7 @@
-package com.example.medidordecibelesapp.api
+package com.denunciaciudadana.app.api
 
-import com.example.medidordecibelesapp.api.ApiService
-import com.example.medidordecibelesapp.api.NoiseApiService
+import com.denunciaciudadana.app.api.ApiService
+import com.denunciaciudadana.app.api.NoiseApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

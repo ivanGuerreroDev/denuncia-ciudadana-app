@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.activities
+package com.denunciaciudadana.app.activities
 
 import android.content.ContentValues
 import android.content.Context
@@ -33,12 +33,12 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import com.example.medidordecibelesapp.R
-import com.example.medidordecibelesapp.api.ApiClient
-import com.example.medidordecibelesapp.database.DBHelper
-import com.example.medidordecibelesapp.models.AccusationDataItem
-import com.example.medidordecibelesapp.models.NoiseAccusation
-import com.example.medidordecibelesapp.models.NoiseAccusationResponse
+import com.denunciaciudadana.app.R
+import com.denunciaciudadana.app.api.ApiClient
+import com.denunciaciudadana.app.database.DBHelper
+import com.denunciaciudadana.app.models.AccusationDataItem
+import com.denunciaciudadana.app.models.NoiseAccusation
+import com.denunciaciudadana.app.models.NoiseAccusationResponse
 
 class DecibelMeasurementActivity : AppCompatActivity() {
 

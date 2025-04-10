@@ -5,11 +5,11 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 android {
-    namespace = "com.example.medidordecibelesapp"
+    namespace = "com.denunciaciudadana.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.medidordecibelesapp"
+        applicationId = "com.denunciaciudadana.app"
         minSdk = 34
         targetSdk = 35
         versionCode = 1

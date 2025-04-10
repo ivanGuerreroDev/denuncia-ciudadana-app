@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.activities
+package com.denunciaciudadana.app.activities
 
 import android.Manifest
 import android.content.Intent
@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import com.example.medidordecibelesapp.R
+import com.denunciaciudadana.app.R
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap

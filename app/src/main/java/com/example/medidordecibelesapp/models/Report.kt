@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.models
+package com.denunciaciudadana.app.models
 
 import java.io.Serializable
 import java.text.SimpleDateFormat

@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.activities
+package com.denunciaciudadana.app.activities
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -25,8 +25,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.medidordecibelesapp.activities.CameraCaptureActivity
-import com.example.medidordecibelesapp.activities.RetratoHabladoActivity
+import com.denunciaciudadana.app.activities.CameraCaptureActivity
+import com.denunciaciudadana.app.activities.RetratoHabladoActivity
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -38,9 +38,9 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
-import com.example.medidordecibelesapp.adapters.AttachedFilesAdapter
-import com.example.medidordecibelesapp.api.ApiClient
-import com.example.medidordecibelesapp.R
+import com.denunciaciudadana.app.adapters.AttachedFilesAdapter
+import com.denunciaciudadana.app.api.ApiClient
+import com.denunciaciudadana.app.R
 /**
  * Activity for reporting crime incidents.
  * Allows users to submit crime reports with personal information,

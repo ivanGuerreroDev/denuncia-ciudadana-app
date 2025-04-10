@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.utils
+package com.denunciaciudadana.app.utils
 
 import java.text.SimpleDateFormat
 import java.util.Date

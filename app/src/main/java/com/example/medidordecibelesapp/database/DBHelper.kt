@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.database
+package com.denunciaciudadana.app.database
 
 import android.content.ContentValues
 import android.content.Context
@@ -6,8 +6,8 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import com.example.medidordecibelesapp.models.AccusationDataItem
-import com.example.medidordecibelesapp.models.Report
+import com.denunciaciudadana.app.models.AccusationDataItem
+import com.denunciaciudadana.app.models.Report
 import org.json.JSONArray
 import org.json.JSONObject
 

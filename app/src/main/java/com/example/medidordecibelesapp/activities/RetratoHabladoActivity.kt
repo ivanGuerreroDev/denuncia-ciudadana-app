@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.activities
+package com.denunciaciudadana.app.activities
 
 import android.content.Intent
 import android.net.Uri
@@ -20,7 +20,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.lang.Exception
-import com.example.medidordecibelesapp.R
+import com.denunciaciudadana.app.R
 import retrofit2.Response
 
 class RetratoHabladoActivity : AppCompatActivity() {
@@ -240,7 +240,7 @@ class RetratoHabladoActivity : AppCompatActivity() {
             val resultIntent = Intent()
             // En una implementación real, guardaríamos la imagen y pasaríamos su URI
             // Por ahora, pasamos un URI ficticio
-            resultIntent.putExtra("retrato_uri", Uri.parse("content://com.example.medidordecibelesapp/retrato_generado"))
+            resultIntent.putExtra("retrato_uri", Uri.parse("content://com.denunciaciudadana.app/retrato_generado"))
             setResult(RESULT_OK, resultIntent)
             
             Toast.makeText(this, "Retrato generado con éxito", Toast.LENGTH_SHORT).show()

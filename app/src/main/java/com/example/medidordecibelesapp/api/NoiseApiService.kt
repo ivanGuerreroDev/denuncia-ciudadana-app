@@ -1,7 +1,7 @@
-package com.example.medidordecibelesapp.api
+package com.denunciaciudadana.app.api
 
-import com.example.medidordecibelesapp.models.NoiseAccusation
-import com.example.medidordecibelesapp.models.NoiseAccusationResponse
+import com.denunciaciudadana.app.models.NoiseAccusation
+import com.denunciaciudadana.app.models.NoiseAccusationResponse
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.*

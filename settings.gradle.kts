@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Medidor Decibeles App"
+rootProject.name = "Denuncia Ciudadana App"
 include(":app")
  

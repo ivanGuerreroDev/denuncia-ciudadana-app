@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp
+package com.denunciaciudadana.app
 
 import org.junit.Test
 

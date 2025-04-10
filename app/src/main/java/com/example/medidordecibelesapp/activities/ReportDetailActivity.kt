@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.activities
+package com.denunciaciudadana.app.activities
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -17,10 +17,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
-import com.example.medidordecibelesapp.R
-import com.example.medidordecibelesapp.database.DBHelper
-import com.example.medidordecibelesapp.models.AccusationDataItem
-import com.example.medidordecibelesapp.models.Report
+import com.denunciaciudadana.app.R
+import com.denunciaciudadana.app.database.DBHelper
+import com.denunciaciudadana.app.models.AccusationDataItem
+import com.denunciaciudadana.app.models.Report
 
 
 /**

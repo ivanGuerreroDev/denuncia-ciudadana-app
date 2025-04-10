@@ -1,6 +1,6 @@
 // This file is deprecated and its functionality has been consolidated into ApiClient.kt
 // File will be removed in a future update
-package com.example.medidordecibelesapp.api
+package com.denunciaciudadana.app.api
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

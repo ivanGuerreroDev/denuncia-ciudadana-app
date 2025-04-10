@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.adapters
+package com.denunciaciudadana.app.adapters
 
 import android.content.Context
 import android.net.Uri
@@ -10,7 +10,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.medidordecibelesapp.R
+import com.denunciaciudadana.app.R
 import java.text.DecimalFormat
 
 class AttachedFilesAdapter(

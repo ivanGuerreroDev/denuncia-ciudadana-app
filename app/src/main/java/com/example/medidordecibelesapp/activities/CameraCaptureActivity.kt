@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.activities
+package com.denunciaciudadana.app.activities
 
 import android.Manifest
 import android.content.ContentValues
@@ -30,7 +30,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.example.medidordecibelesapp.R
+import com.denunciaciudadana.app.R
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.ExecutorService
@@ -200,7 +200,7 @@ class CameraCaptureActivity : AppCompatActivity() {
 
         try {
             // Create output options with timestamp filename
-            val contentValues = createMediaContentValues("image/jpeg", "Pictures/MedidorDecibelesApp")
+            val contentValues = createMediaContentValues("image/jpeg", "Pictures/DenunciaCiudadanaApp")
             
             val outputOptions = ImageCapture.OutputFileOptions
                 .Builder(contentResolver, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
@@ -255,7 +255,7 @@ class CameraCaptureActivity : AppCompatActivity() {
 
         try {
             // Create output options with timestamp filename
-            val contentValues = createMediaContentValues("video/mp4", "Movies/MedidorDecibelesApp")
+            val contentValues = createMediaContentValues("video/mp4", "Movies/DenunciaCiudadanaApp")
             
             val mediaStoreOutputOptions = MediaStoreOutputOptions
                 .Builder(contentResolver, MediaStore.Video.Media.EXTERNAL_CONTENT_URI)

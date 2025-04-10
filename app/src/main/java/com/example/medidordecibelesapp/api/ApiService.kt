@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.api
+package com.denunciaciudadana.app.api
 
 import okhttp3.MultipartBody
 import okhttp3.RequestBody

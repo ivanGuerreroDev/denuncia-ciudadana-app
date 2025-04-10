@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Medidor Decibeles App</string>
+    <string name="app_name">Denuncia Ciudadana App</string>
     <string name="back_button_description">Volver</string>
     <string name="denuncia_delito">¿Viste un delito? Repórtalo</string>
     <string name="denunciar_ruido">Reporte de ruido excesivo</string>

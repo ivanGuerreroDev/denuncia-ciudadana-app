@@ -1,4 +1,4 @@
-package com.example.medidordecibelesapp.activities
+package com.denunciaciudadana.app.activities
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,9 +11,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.medidordecibelesapp.R
-import com.example.medidordecibelesapp.database.DBHelper
-import com.example.medidordecibelesapp.models.Report
+import com.denunciaciudadana.app.R
+import com.denunciaciudadana.app.database.DBHelper
+import com.denunciaciudadana.app.models.Report
 
 /**
  * Activity that displays a list of all reports submitted by the user.
