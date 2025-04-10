@@ -1,7 +1,5 @@
 package com.denunciaciudadana.app.api
 
-import com.denunciaciudadana.app.api.ApiService
-import com.denunciaciudadana.app.api.NoiseApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -42,16 +40,17 @@ object ApiClient {
     }
     
     /**
-     * API service for noise-related endpoints.
-     */
-    val noiseApiService: NoiseApiService by lazy {
-        retrofit.create(NoiseApiService::class.java)
-    }
-    
-    /**
-     * API service for general endpoints.
+     * API service for all endpoints in the application.
      */
     val apiService: ApiService by lazy {
         retrofit.create(ApiService::class.java)
+    }
+    
+    /**
+     * @deprecated Use apiService instead. This property is kept for backward compatibility.
+     */
+    @Deprecated("Use apiService instead", ReplaceWith("apiService"))
+    val noiseApiService: ApiService by lazy {
+        apiService
     }
 }

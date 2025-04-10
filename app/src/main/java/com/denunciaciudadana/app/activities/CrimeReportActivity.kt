@@ -41,6 +41,10 @@ import retrofit2.Response
 import com.denunciaciudadana.app.adapters.AttachedFilesAdapter
 import com.denunciaciudadana.app.api.ApiClient
 import com.denunciaciudadana.app.R
+import com.denunciaciudadana.app.models.Accusation
+import com.denunciaciudadana.app.models.AccusationDataItem
+import com.denunciaciudadana.app.models.AccusationResponse
+
 /**
  * Activity for reporting crime incidents.
  * Allows users to submit crime reports with personal information,
@@ -193,19 +197,21 @@ class CrimeReportActivity : AppCompatActivity() {
         }
         
         try {
-            // Prepare data for API request
-            val reportData = prepareCrimeReportData()
-            
-            // Convert to JSON
-            val objectMapper = ObjectMapper()
-            val requestBodyJson = objectMapper.writeValueAsString(reportData)
-            val mediaType = "application/json".toMediaType()
-            val requestBody = requestBodyJson.toRequestBody(mediaType)
-
+            val accusationDataList = listOf(
+                AccusationDataItem("fullName", fullNameField.text.toString()),
+                AccusationDataItem("identification", identificationField.text.toString()),
+                AccusationDataItem("phoneNumber", phoneNumberField.text.toString()),
+                AccusationDataItem("location", locationField.text.toString()),
+                AccusationDataItem("eventDescription", eventDescriptionField.text.toString())
+            )
+            val crimeAccusation = Accusation(
+                accusationTypeId = 1,
+                accusationData = accusationDataList
+            )
             // Send API request
             lifecycleScope.launch {
                 try {
-                    val response: Response<Unit> = ApiClient.apiService.sendAccusation(requestBody)
+                    val response: Response<AccusationResponse> = ApiClient.apiService.sendAccusation(crimeAccusation)
                     handleApiResponse(response)
                 } catch (e: Exception) {
                     Log.e(TAG, "Exception sending report: ${e.message}", e)
@@ -239,25 +245,9 @@ class CrimeReportActivity : AppCompatActivity() {
     }
     
     /**
-     * Prepare the crime report data for API submission.
-     */
-    private fun prepareCrimeReportData(): Map<String, Any> {
-        return mapOf(
-            "accusationTypeId" to 1,
-            "accusationData" to listOf(
-                mapOf("key" to "fullName", "value" to fullNameField.text.toString()),
-                mapOf("key" to "identification", "value" to identificationField.text.toString()),
-                mapOf("key" to "phoneNumber", "value" to phoneNumberField.text.toString()),
-                mapOf("key" to "location", "value" to locationField.text.toString()),
-                mapOf("key" to "eventDescription", "value" to eventDescriptionField.text.toString())
-            )
-        )
-    }
-    
-    /**
      * Handle API response after submitting a report.
      */
-    private fun handleApiResponse(response: Response<Unit>) {
+    private fun handleApiResponse(response: Response<AccusationResponse>) {
         if (response.isSuccessful) {
             Log.d(TAG, "Report sent successfully")
             runOnUiThread {

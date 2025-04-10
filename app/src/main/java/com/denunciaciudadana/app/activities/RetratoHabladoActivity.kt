@@ -21,7 +21,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.lang.Exception
 import com.denunciaciudadana.app.R
-import retrofit2.Response
 
 class RetratoHabladoActivity : AppCompatActivity() {
 
@@ -208,7 +207,7 @@ class RetratoHabladoActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 // Aquí se haría la llamada real a la API
-                // val response: Response<RetratoResponse> = RetrofitClient.api.generarRetrato(requestBody)
+                // val response: Response<RetratoResponse> = ApiClient.apiService.generarRetrato(requestBody)
                 
                 // Simulamos una respuesta exitosa para propósitos de demostración
                 // En una implementación real, procesaríamos la respuesta de la API

@@ -22,7 +22,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.*
+import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -37,8 +39,8 @@ import com.denunciaciudadana.app.R
 import com.denunciaciudadana.app.api.ApiClient
 import com.denunciaciudadana.app.database.DBHelper
 import com.denunciaciudadana.app.models.AccusationDataItem
-import com.denunciaciudadana.app.models.NoiseAccusation
-import com.denunciaciudadana.app.models.NoiseAccusationResponse
+import com.denunciaciudadana.app.models.Accusation
+import com.denunciaciudadana.app.models.AccusationResponse
 
 class DecibelMeasurementActivity : AppCompatActivity() {
 
@@ -201,7 +203,6 @@ class DecibelMeasurementActivity : AppCompatActivity() {
                         override fun run() {
                             try {
                                 val amplitude = mediaRecorder?.maxAmplitude ?: 0
-                                Log.d("AudioMeasurement", "Raw amplitude: $amplitude")
                                 
                                 // Ajustar la fórmula de cálculo de decibeles para evitar valores muy bajos
                                 currentDecibels = if (amplitude > 1) {
@@ -354,56 +355,56 @@ class DecibelMeasurementActivity : AppCompatActivity() {
         )
         
         // Crear objeto para la petición
-        val noiseAccusation = NoiseAccusation(
+        val noiseAccusation = Accusation(
             accusationTypeId = 2,
             accusationData = accusationDataList
         )
 
-        // Primera petición POST para reportar el ruido
-        ApiClient.noiseApiService.reportNoise(noiseAccusation).enqueue(object : Callback<NoiseAccusationResponse> {
-            override fun onResponse(call: Call<NoiseAccusationResponse>, response: Response<NoiseAccusationResponse>) {
+        // Usar lifecycleScope para llamar la función suspend sendAccusation
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.apiService.sendAccusation(noiseAccusation)
                 if (response.isSuccessful) {
                     val accusationResponse = response.body()
-                    if (accusationResponse != null) {
+                    Log.d("API", "Accusation response: $accusationResponse")
+                    if (accusationResponse?.data?.id != null) {
                         // Obtener el ID de la acusación y enviar el archivo de audio
-                        uploadAudioFile(accusationResponse.id)
+                        uploadAudioFile(accusationResponse.data.id)
                     } else {
                         handleApiError("La respuesta no contenía datos")
                     }
                 } else {
                     handleApiError("Error en la respuesta: ${response.code()}")
                 }
+            } catch (e: Exception) {
+                handleApiError("Error de red: ${e.message}")
             }
-
-            override fun onFailure(call: Call<NoiseAccusationResponse>, t: Throwable) {
-                handleApiError("Error de red: ${t.message}")
-            }
-        })
+        }
     }
 
-    private fun uploadAudioFile(accusationId: String) {
+    private fun uploadAudioFile(accusationId: Int) {
         val file = audioFile ?: return
         
         // Preparar el archivo para el envío
         val requestFile = file.asRequestBody("audio/3gpp".toMediaTypeOrNull())
-        val audioPart = MultipartBody.Part.createFormData("audio", file.name, requestFile)
+        // Cambiando el nombre del campo de 'audio' a 'file' para que coincida con lo que espera el backend
+        val audioPart = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
-        // Segunda petición PATCH para subir el archivo de audio
-        ApiClient.noiseApiService.uploadAudioFile(accusationId, audioPart).enqueue(object : Callback<NoiseAccusationResponse> {
-            override fun onResponse(call: Call<NoiseAccusationResponse>, response: Response<NoiseAccusationResponse>) {
+        // Segunda petición para subir el archivo de audio usando coroutines
+        lifecycleScope.launch {
+            try {
+                val response = ApiClient.apiService.uploadAudioFile(accusationId, audioPart)
                 if (response.isSuccessful) {
                     handleApiSuccess("Reporte de ruido enviado correctamente")
                 } else {
                     handleApiError("Error al subir el archivo de audio: ${response.code()}")
                 }
+            } catch (e: Exception) {
+                handleApiError("Error de red al subir el audio: ${e.message}")
+            } finally {
                 resetRecordingState()
             }
-
-            override fun onFailure(call: Call<NoiseAccusationResponse>, t: Throwable) {
-                handleApiError("Error de red al subir el audio: ${t.message}")
-                resetRecordingState()
-            }
-        })
+        }
     }
 
     private fun handleApiSuccess(message: String) {

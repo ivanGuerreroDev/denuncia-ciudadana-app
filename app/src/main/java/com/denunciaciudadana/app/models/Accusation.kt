@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName
  * @property accusationTypeId The type identifier for noise complaints (default: 2)
  * @property accusationData List of key-value data points associated with this accusation
  */
-data class NoiseAccusation(
+data class Accusation(
     @SerializedName("accusationTypeId")
     val accusationTypeId: Int = 2,
     

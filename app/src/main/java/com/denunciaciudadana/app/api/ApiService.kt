@@ -1,12 +1,15 @@
 package com.denunciaciudadana.app.api
 
+import com.denunciaciudadana.app.models.Accusation
+import com.denunciaciudadana.app.models.AccusationResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
 
 /**
- * Interface defining general API endpoints for the application.
+ * Unified API service interface for all endpoints in the application.
  * Used with Retrofit to communicate with the server.
  */
 interface ApiService {
@@ -17,19 +20,19 @@ interface ApiService {
      * @return A Response object with the server's response
      */
     @POST("accusations")
-    suspend fun sendAccusation(@Body body: RequestBody): Response<Unit>
-
+    suspend fun sendAccusation(@Body body: Accusation): Response<AccusationResponse>
+    
     /**
-     * Uploads a file attachment for an existing accusation.
+     * Uploads an audio file for an existing noise accusation.
      *
-     * @param accusationId The ID of the accusation
-     * @param file The file to upload
+     * @param id The ID of the noise accusation
+     * @param audioFile The audio file as a MultipartBody.Part
      * @return A Response object with the server's response
      */
     @Multipart
-    @POST("accusations/{accusationId}/upload")
-    suspend fun uploadFile(
-        @Path("accusationId") accusationId: String,
-        @Part file: MultipartBody.Part
-    ): Response<Unit>
+    @POST("accusations/{id}/upload")
+    suspend fun uploadAudioFile(
+        @Path("id") id: Int,
+        @Part audioFile: MultipartBody.Part
+    ): Response<AccusationResponse>
 }
